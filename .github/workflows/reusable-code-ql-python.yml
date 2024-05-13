@@ -1,0 +1,28 @@
+name: 📝 • CodeQL • Python
+on:
+  workflow_call:
+
+jobs:
+  analyze:
+    name: 🐍 Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      # check out the repository (including submodules and all history)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      # initialize CodeQL with the extended security-and-quality queries
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+          config: |
+            queries:
+            - uses: security-and-quality
+      # perform the CodeQL analysis
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3

@@ -1,0 +1,54 @@
+name: 🐍 • Lint
+on:
+  workflow_call:
+    inputs:
+      setup-z3:
+        description: "Whether to set up Z3"
+        default: false
+        type: boolean
+      z3-version:
+        description: "The version of Z3 to set up"
+        default: "4.11.2"
+        type: string
+
+jobs:
+  lint:
+    name: 🚨 Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # check out the repository (including submodules and all history)
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      # optionally set up Z3
+      - if: ${{ inputs.setup-z3 }}
+        name: Setup Z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ inputs.z3-version }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      # set up ccache for faster C++ builds
+      - name: Setup ccache
+        uses: Chocobo1/setup-ccache-action@v1
+        with:
+          prepend_symlinks_to_path: false
+          override_cache_key: lint
+      # set up mold as linker for faster C++ builds
+      - name: Set up mold as linker
+        uses: rui314/setup-mold@v1
+      # set up uv for faster Python package management
+      - uses: yezz123/setup-uv@v4
+      # set up nox for convenient linting
+      - uses: wntrblm/nox@2024.04.15
+        with:
+          python-versions: "3.12"
+      # run the nox lint session (assumes a nox session named "lint" exists, and `mypy` is configured in pre-commit)
+      - name: Run mypy
+        run: nox -s lint -- mypy
+      # run check-sdist to ensure the package sdist is correct
+      - name: Run check-sdist
+        run: |
+          pipx run check-sdist --inject-junk
