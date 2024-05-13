@@ -16,7 +16,7 @@ on:
         type: boolean
       z3-version:
         description: "The version of Z3 to set up"
-        default: "4.11.2"
+        default: "4.13.0"
         type: string
 
 defaults:
