@@ -1,10 +1,6 @@
 name: 🇨‌ • CI
 on:
   workflow_call:
-    secrets:
-      token:
-        description: "The token to use for Codecov"
-        required: true
     inputs:
       cmake-args:
         description: "Additional arguments to pass to CMake on every OS"
@@ -69,8 +65,6 @@ jobs:
   coverage:
     name: 📈
     uses: ./.github/workflows/reusable-cpp-coverage.yml
-    secrets:
-      token: ${{ secrets.token }}
     with:
       cmake-args: ${{ inputs.cmake-args }} ${{ inputs.cmake-args-ubuntu }}
       setup-z3: ${{ inputs.setup-z3 }}

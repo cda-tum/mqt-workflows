@@ -1,10 +1,6 @@
 name: 🇨 • Coverage
 on:
   workflow_call:
-    secrets:
-      token:
-        description: "The token to use for Codecov"
-        required: true
     inputs:
       cmake-args:
         description: "Additional arguments to pass to CMake"
@@ -23,6 +19,8 @@ jobs:
   coverage:
     name: 📈 Coverage
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     env:
       CMAKE_BUILD_PARALLEL_LEVEL: 4
       CTEST_PARALLEL_LEVEL: 4
@@ -59,4 +57,4 @@ jobs:
         with:
           fail_ci_if_error: true
           flags: cpp
-          token: ${{ secrets.token }}
+          use_oidc: true

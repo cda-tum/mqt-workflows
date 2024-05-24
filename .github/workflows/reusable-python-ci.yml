@@ -2,10 +2,6 @@ name: 🐍 • CI
 
 on:
   workflow_call:
-    secrets:
-      token:
-        description: "The token to use for Codecov"
-        required: true
     inputs:
       setup-z3:
         description: "Whether to set up Z3"
@@ -123,4 +119,4 @@ jobs:
         with:
           fail_ci_if_error: true
           flags: python
-          token: ${{ secrets.token }}
+          use_oidc: true
