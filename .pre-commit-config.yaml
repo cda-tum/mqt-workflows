@@ -64,12 +64,3 @@ repos:
     hooks:
       - id: check-dependabot
       - id: check-github-workflows
-      - id: check-jsonschema
-        name: "Validate Release Drafter configuration"
-        files: ^\.github/release-drafter.yml$
-        types: [yaml]
-        args:
-          [
-            "--schemafile",
-            "https://raw.githubusercontent.com/release-drafter/release-drafter/master/schema.json",
-          ]
