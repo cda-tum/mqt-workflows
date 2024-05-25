@@ -1,10 +1,6 @@
 name: 🐍 • Tests
 on:
   workflow_call:
-    secrets:
-      token:
-        description: "The token to use for Codecov"
-        required: true
     inputs:
       runs-on:
         description: "The platform to run the tests on (ubuntu-latest, macos-latest, windows-latest)"
@@ -62,14 +58,13 @@ jobs:
           python-versions: ${{ inputs.python-version }}
       # run the nox minimums session (assumes a nox session named "minimums" exists) with coverage
       - name: Test on 🐍 ${{ inputs.python-version }} with minimal versions
-        run: nox -s minimums-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml
+        run: nox -s minimums-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml:coverage-${{ inputs.python-version }}-${{ inputs.runs-on }}.xml
       # run the nox tests session (assumes a nox session named "tests" exists) with coverage
       - name: Test on 🐍 ${{ inputs.python-version }}
-        run: nox -s tests-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml --cov-append
-      # upload coverage to Codecov
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        run: nox -s tests-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml:coverage-${{ inputs.python-version }}-${{ inputs.runs-on }}.xml --cov-append
+      # upload the report as an artifact to GitHub so that it can later be uploaded to Codecov
+      - name: Upload coverage report for 🐍 ${{ inputs.python-version }} on ${{ inputs.runs-on }}
+        uses: actions/upload-artifact@v4
         with:
-          fail_ci_if_error: true
-          flags: python
-          token: ${{ secrets.token }}
+          name: coverage-${{ inputs.python-version }}-${{ inputs.runs-on }}
+          path: coverage-*

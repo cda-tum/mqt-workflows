@@ -2,10 +2,6 @@ name: 🐍 • CI
 
 on:
   workflow_call:
-    secrets:
-      token:
-        description: "The token to use for Codecov"
-        required: true
     inputs:
       setup-z3:
         description: "Whether to set up Z3"
@@ -69,8 +65,6 @@ jobs:
       python-version: ${{ matrix.python-version }}
       setup-z3: ${{ inputs.setup-z3 }}
       z3-version: ${{ inputs.z3-version }}
-    secrets:
-      token: ${{ secrets.token }}
 
   python-tests-macos:
     name: 🍎 ${{ matrix.python-version }} ${{ matrix.runs-on }}
@@ -89,8 +83,6 @@ jobs:
       python-version: ${{ matrix.python-version }}
       setup-z3: ${{ inputs.setup-z3 }}
       z3-version: ${{ inputs.z3-version }}
-    secrets:
-      token: ${{ secrets.token }}
 
   python-tests-windows:
     name: 🏁 ${{ matrix.python-version }}
@@ -108,5 +100,25 @@ jobs:
       python-version: ${{ matrix.python-version }}
       setup-z3: ${{ inputs.setup-z3 }}
       z3-version: ${{ inputs.z3-version }}
-    secrets:
-      token: ${{ secrets.token }}
+
+  python-coverage-upload:
+    name: 📈
+    needs: [python-tests-ubuntu, python-tests-macos, python-tests-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      # check out the repository (mostly for the codecov config)
+      - uses: actions/checkout@v4
+      # download coverage reports from all jobs
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: coverage-reports
+          merge-multiple: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: true
+          flags: python
+          use_oidc: true
