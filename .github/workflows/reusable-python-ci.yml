@@ -108,6 +108,8 @@ jobs:
     permissions:
       id-token: write
     steps:
+      # check out the repository (mostly for the codecov config)
+      - uses: actions/checkout@v4
       # download coverage reports from all jobs
       - uses: actions/download-artifact@v4
         with:
