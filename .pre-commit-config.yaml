@@ -46,7 +46,7 @@ repos:
 
   # Check for spelling
   - repo: https://github.com/codespell-project/codespell
-    rev: "v2.2.6"
+    rev: "v2.3.0"
     hooks:
       - id: codespell
         args: ["-L", "wille,linz", "--skip", "*.ipynb,*.bib"]
@@ -60,7 +60,7 @@ repos:
 
   # Check JSON schemata
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: "0.28.3"
+    rev: "0.28.4"
     hooks:
       - id: check-dependabot
       - id: check-github-workflows
