@@ -103,8 +103,6 @@ jobs:
         uses: yezz123/setup-uv@v4
       # run cibuildwheel to build wheels for the specified Python version
       - uses: pypa/cibuildwheel@v2.19
-        env:
-          CIBW_BUILD_FRONTEND: "build[uv]; args: --no-isolation"
       - name: Verify clean directory
         run: git diff --exit-code
         shell: bash
@@ -143,7 +141,6 @@ jobs:
         uses: pypa/cibuildwheel@v2.19
         env:
           CIBW_ARCHS_LINUX: ${{ matrix.arch }}
-          CIBW_BUILD_FRONTEND: "build[uv]; args: --no-isolation"
           CIBW_TEST_SKIP: "cp*"
       # upload the wheels as an artifact
       - uses: actions/upload-artifact@v4
