@@ -60,50 +60,15 @@ jobs:
           name: cibw-wheel
           path: dist/*.whl
 
-  dist:
-    if: ${{ !inputs.pure-python }}
-    name: 📦 Check
-    runs-on: ubuntu-latest
-    steps:
-      # check out the repository (including submodules and all history)
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      # optionally set up Z3
-      - if: ${{ inputs.setup-z3 }}
-        name: Setup Z3
-        uses: cda-tum/setup-z3@v1
-        with:
-          version: ${{ inputs.z3-version }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-      # set up mold as linker for faster C++ builds (Linux only)
-      - name: Set up mold as linker (Linux only)
-        uses: rui314/setup-mold@v1
-      # run the build-and-inspect-python-package action (outputs supported Python versions)
-      - uses: hynek/build-and-inspect-python-package@v2
-        id: baipp
-        with:
-          skip-wheel: "true"
-      # create identifiers for supported Python versions
-      - name: 🐍 create identifiers for supported Python versions
-        id: python-versions
-        run: echo "python-versions=$(echo '${{ steps.baipp.outputs.supported_python_classifiers_json_array }}' | jq -c --raw-output 'map("cp" + . | gsub("\\."; ""))')" >> $GITHUB_OUTPUT
-    outputs:
-      python-versions: ${{ steps.python-versions.outputs.python-versions }}
-
   build_wheels:
     if: ${{ !inputs.pure-python }}
-    needs: dist
-    name: 🎡 ${{ matrix.runs-on }} ${{ matrix.python }}
+    name: 🎡 ${{ matrix.runs-on }}
     runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
       matrix:
         # build wheels for all supported Python versions on all platforms
         runs-on: [ubuntu-latest, macos-13, macos-14, windows-latest]
-        python: ${{ fromJson(needs.dist.outputs.python-versions) }}
     steps:
       # check out the repository (including submodules and all history)
       - uses: actions/checkout@v4
@@ -132,11 +97,14 @@ jobs:
         with:
           prepend_symlinks_to_path: false
           windows_compile_environment: msvc
-          override_cache_key: wheels-${{ matrix.runs-on }}-${{ matrix.python }}
+          override_cache_key: wheels-${{ matrix.runs-on }}
+      # set up uv for faster Python package management
+      - if: matrix.runs-on != 'ubuntu-latest'
+        uses: yezz123/setup-uv@v4
       # run cibuildwheel to build wheels for the specified Python version
       - uses: pypa/cibuildwheel@v2.19
         env:
-          CIBW_BUILD: ${{ matrix.python }}-*
+          CIBW_BUILD_FRONTEND: "build[uv]; args: --no-isolation"
       - name: Verify clean directory
         run: git diff --exit-code
         shell: bash
@@ -144,20 +112,18 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.runs-on }}-${{ matrix.python }}-${{ strategy.job-index }}
+          name: cibw-wheels-${{ matrix.runs-on }}-${{ strategy.job-index }}
           path: wheelhouse/*.whl
 
   build_wheels_emulation:
     if: ${{ !inputs.pure-python }}
-    needs: dist
-    name: 🎡 ${{ matrix.arch }} ${{ matrix.python }}
+    name: 🎡 ${{ matrix.arch }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         # build wheels for all supported Python versions on all platforms that require emulation
         arch: ["s390x", "ppc64le", "aarch64"]
-        python: ${{ fromJson(needs.dist.outputs.python-versions) }}
     steps:
       # check out the repository (including submodules and all history)
       - uses: actions/checkout@v4
@@ -177,10 +143,10 @@ jobs:
         uses: pypa/cibuildwheel@v2.19
         env:
           CIBW_ARCHS_LINUX: ${{ matrix.arch }}
-          CIBW_BUILD: ${{ matrix.python }}-*
+          CIBW_BUILD_FRONTEND: "build[uv]; args: --no-isolation"
           CIBW_TEST_SKIP: "cp*"
       # upload the wheels as an artifact
       - uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.arch }}-${{ matrix.python }}-${{ strategy.job-index }}
+          name: cibw-wheels-${{ matrix.arch }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
