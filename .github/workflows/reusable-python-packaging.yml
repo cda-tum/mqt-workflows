@@ -78,7 +78,7 @@ jobs:
       # set up MSVC development environment (Windows only)
       - uses: ilammy/msvc-dev-cmd@v1
       # optionally set up Z3 (non-Ubuntu only)
-      - if: ${{ inputs.setup-z3 }} && matrix.os != 'ubuntu-latest'
+      - if: ${{ inputs.setup-z3 && matrix.runs-on != 'ubuntu-latest' }}
         name: Setup Z3
         uses: cda-tum/setup-z3@v1
         with:
@@ -86,7 +86,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
       # optionally set up Z3 (Ubuntu only)
-      - if: ${{ inputs.setup-z3 }} && matrix.runs-on == 'ubuntu-latest'
+      - if: ${{ inputs.setup-z3 && matrix.runs-on == 'ubuntu-latest' }}
         name: Set environment variables for Z3 installation in manylinux image
         run: |
           echo "CIBW_BEFORE_ALL_LINUX=/opt/python/cp311-cp311/bin/pip install z3-solver==${{ inputs.z3-version }}" >> $GITHUB_ENV
