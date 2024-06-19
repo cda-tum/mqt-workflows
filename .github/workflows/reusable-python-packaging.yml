@@ -60,6 +60,59 @@ jobs:
           name: cibw-wheel
           path: dist/*.whl
 
+  build_wheels:
+    if: ${{ !inputs.pure-python }}
+    name: 🎡 ${{ matrix.runs-on }}
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # build wheels for all supported Python versions on all platforms
+        runs-on: [ubuntu-latest, macos-13, macos-14, windows-latest]
+    steps:
+      # check out the repository (including submodules and all history)
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      # set up MSVC development environment (Windows only)
+      - uses: ilammy/msvc-dev-cmd@v1
+      # optionally set up Z3 (non-Ubuntu only)
+      - if: ${{ inputs.setup-z3 && matrix.runs-on != 'ubuntu-latest' }}
+        name: Setup Z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ inputs.z3-version }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      # optionally set up Z3 (Ubuntu only)
+      - if: ${{ inputs.setup-z3 && matrix.runs-on == 'ubuntu-latest' }}
+        name: Set environment variables for Z3 installation in manylinux image
+        run: |
+          echo "CIBW_BEFORE_ALL_LINUX=/opt/python/cp311-cp311/bin/pip install z3-solver==${{ inputs.z3-version }}" >> $GITHUB_ENV
+      # set up ccache for faster C++ builds
+      - if: matrix.runs-on != 'ubuntu-latest'
+        name: Setup ccache
+        uses: Chocobo1/setup-ccache-action@v1
+        with:
+          prepend_symlinks_to_path: false
+          windows_compile_environment: msvc
+          override_cache_key: wheels-${{ matrix.runs-on }}
+      # set up uv for faster Python package management
+      - if: matrix.runs-on != 'ubuntu-latest'
+        uses: yezz123/setup-uv@v4
+      # run cibuildwheel to build wheels for the specified Python version
+      - uses: pypa/cibuildwheel@v2.19
+      - name: Verify clean directory
+        run: git diff --exit-code
+        shell: bash
+      # upload the wheels as an artifact
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.runs-on }}-${{ strategy.job-index }}
+          path: wheelhouse/*.whl
+
   dist:
     if: ${{ !inputs.pure-python }}
     name: 📦 Check
@@ -93,60 +146,6 @@ jobs:
     outputs:
       python-versions: ${{ steps.python-versions.outputs.python-versions }}
 
-  build_wheels:
-    if: ${{ !inputs.pure-python }}
-    needs: dist
-    name: 🎡 ${{ matrix.runs-on }} ${{ matrix.python }}
-    runs-on: ${{ matrix.runs-on }}
-    strategy:
-      fail-fast: false
-      matrix:
-        # build wheels for all supported Python versions on all platforms
-        runs-on: [ubuntu-latest, macos-13, macos-14, windows-latest]
-        python: ${{ fromJson(needs.dist.outputs.python-versions) }}
-    steps:
-      # check out the repository (including submodules and all history)
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      # set up MSVC development environment (Windows only)
-      - uses: ilammy/msvc-dev-cmd@v1
-      # optionally set up Z3 (non-Ubuntu only)
-      - if: ${{ inputs.setup-z3 }} && matrix.os != 'ubuntu-latest'
-        name: Setup Z3
-        uses: cda-tum/setup-z3@v1
-        with:
-          version: ${{ inputs.z3-version }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-      # optionally set up Z3 (Ubuntu only)
-      - if: ${{ inputs.setup-z3 }} && matrix.runs-on == 'ubuntu-latest'
-        name: Set environment variables for Z3 installation in manylinux image
-        run: |
-          echo "CIBW_BEFORE_ALL_LINUX=/opt/python/cp311-cp311/bin/pip install z3-solver==${{ inputs.z3-version }}" >> $GITHUB_ENV
-      # set up ccache for faster C++ builds
-      - if: matrix.runs-on != 'ubuntu-latest'
-        name: Setup ccache
-        uses: Chocobo1/setup-ccache-action@v1
-        with:
-          prepend_symlinks_to_path: false
-          windows_compile_environment: msvc
-          override_cache_key: wheels-${{ matrix.runs-on }}-${{ matrix.python }}
-      # run cibuildwheel to build wheels for the specified Python version
-      - uses: pypa/cibuildwheel@v2.18
-        env:
-          CIBW_BUILD: ${{ matrix.python }}-*
-      - name: Verify clean directory
-        run: git diff --exit-code
-        shell: bash
-      # upload the wheels as an artifact
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: cibw-wheels-${{ matrix.runs-on }}-${{ matrix.python }}-${{ strategy.job-index }}
-          path: wheelhouse/*.whl
-
   build_wheels_emulation:
     if: ${{ !inputs.pure-python }}
     needs: dist
@@ -174,7 +173,7 @@ jobs:
           echo "CIBW_BEFORE_ALL_LINUX=/opt/python/cp311-cp311/bin/pip install z3-solver==${{ inputs.z3-version }}" >> $GITHUB_ENV
       # run cibuildwheel to build wheels for the specified Python version
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.18
+        uses: pypa/cibuildwheel@v2.19
         env:
           CIBW_ARCHS_LINUX: ${{ matrix.arch }}
           CIBW_BUILD: ${{ matrix.python }}-*
