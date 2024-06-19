@@ -1,6 +1,16 @@
 name: ⬆️ Update MQT Core
 on:
   workflow_call:
+    secrets:
+      token:
+        description: |
+          Personal Access Token (PAT) with `repo` scope.
+          You can pass the `github.token` provided by GitHub Actions,
+          which does not have these permissions and, hence, cannot
+          trigger workflows in the PRs created by this workflow.
+          As a workaround, such a PR can be closed and re-opened
+          by a maintainer to trigger the PR workflows.
+        required: true
 
 jobs:
   update-mqt-core:
@@ -85,7 +95,7 @@ jobs:
         if: steps.compare-versions.outputs.update == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ github.token }}
+          token: ${{ secrets.token }}
           commit-message: "⬆️ Update `cda-tum/mqt-core`"
           title: "⬆️ Update `cda-tum/mqt-core`"
           body: |
