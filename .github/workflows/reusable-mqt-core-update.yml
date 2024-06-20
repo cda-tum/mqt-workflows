@@ -1,6 +1,11 @@
 name: ⬆️ Update MQT Core
 on:
   workflow_call:
+    inputs:
+      update-to-head:
+        description: "Whether to update to the latest commit on the main branch or the latest release"
+        default: false
+        type: boolean
 
 jobs:
   update-mqt-core:
@@ -31,8 +36,7 @@ jobs:
           echo "Parsed revision: $revision"
           echo "version=$version" >> $GITHUB_OUTPUT
           echo "revision=$revision" >> $GITHUB_OUTPUT
-      # Query the latest tag of mqt-core and its commit SHA via the GitHub API
-      # Use {github.token} to authenticate with the GitHub API.
+      # Query the latest tag of mqt-core via the GitHub API (using the GitHub token for authentication).
       - name: Get latest release of MQT Core
         id: get-latest-release
         run: |
@@ -44,12 +48,25 @@ jobs:
           echo "tag=$tag"
           echo "latest_version=$latest_version"
           echo "latest_version=$latest_version" >> $GITHUB_OUTPUT
+      # Query the commit SHA of the latest tag of mqt-core via the GitHub API (using the GitHub token for authentication).
+      - name: Get the commit SHA of the latest tag of MQT Core
+        id: get-latest-tag-sha
+        run: |
           echo "Querying the tags of MQT Core..."
           tags=$(curl -s -H "Authorization: token ${{ github.token }}" https://api.github.com/repos/cda-tum/mqt-core/tags)
           echo "tags=$tags"
-          latest_commit=$(echo $tags | jq -r '.[0].commit.sha')
-          echo "latest_commit=$latest_commit"
-          echo "latest_commit=$latest_commit" >> $GITHUB_OUTPUT
+          latest_tag_sha=$(echo $tags | jq -r '.[0].commit.sha')
+          echo "latest_tag_sha=$latest_tag_sha"
+          echo "latest_tag_sha=$latest_tag_sha" >> $GITHUB_OUTPUT
+      # Query the latest commit of the main branch of mqt-core via the GitHub API (using the GitHub token for authentication).
+      - name: Get the latest commit of the main branch of MQT Core
+        id: get-latest-commit
+        run: |
+          echo "Querying the latest commit of the main branch of MQT Core..."
+          latest_commit=$(curl -s -H "Authorization: token ${{ github.token }}" https://api.github.com/repos/cda-tum/mqt-core/commits/main)
+          latest_commit_sha=$(echo $latest_commit | jq -r '.sha')
+          echo "latest_commit_sha=$latest_commit_sha"
+          echo "latest_commit_sha=$latest_commit_sha" >> $GITHUB_OUTPUT
       # Install the `semver` tool for making semantic version comparisons.
       - name: Install semver
         run: |
@@ -57,27 +74,61 @@ jobs:
           https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver
           chmod +x /usr/local/bin/semver
       # Compare the used version with the latest version based on SemVer.
-      # If the latest version is newer or the version is the same, but the revision
-      # is different, set the output to update MQT Core.
+      # Indicate to update MQT Core, whenever
+      # - the user wants to update to the latest commit on the main branch and the used revision is different, or
+      # - the latest version is newer than the used version, or
+      # - the latest version is the same as the used version, but its tag has a different commit SHA than the used revision.
       - name: Compare versions
         id: compare-versions
         run: |
-          if semver compare ${{ steps.get-used-version.outputs.version }} ${{ steps.get-latest-release.outputs.latest_version }} < 0; then
-            update=true
-          elif [ ${{ steps.get-used-version.outputs.version }} = ${{ steps.get-latest-release.outputs.latest_version }} ] && [ ${{ steps.get-used-version.outputs.revision }} != ${{ steps.get-latest-release.outputs.latest_commit }} ]; then
-            update=true
+          if [ ${{ inputs.update-to-head }} = true ]
+            if [ ${{ steps.get-used-version.outputs.revision }} != ${{ steps.get-latest-commit.outputs.latest_commit_sha }} ]; then
+              update=true
+            else
+              update=false
+            fi
           else
-            update=false
+            if semver compare ${{ steps.get-used-version.outputs.version }} ${{ steps.get-latest-release.outputs.latest_version }} < 0; then
+              update=true
+            elif [ ${{ steps.get-used-version.outputs.version }} = ${{ steps.get-latest-release.outputs.latest_version }} ] && [ ${{ steps.get-used-version.outputs.revision }} != ${{ steps.get-latest-tag-sha.outputs.latest_tag_sha }} ]; then
+              update=true
+            else
+              update=false
+            fi
           fi
           echo "update=$update"
           echo "update=$update" >> $GITHUB_OUTPUT
+      # If an update should be performed, properly set the new version and revision based on the update type.
+      # If the user wants to update to the latest commit on the main branch, set the revision to the latest commit SHA,
+      # and if the latest commit SHA is different from the latest tag SHA, use the semver tool to increment the patch
+      # version. Otherwise, set the version to the latest version. If the user wants to update to the latest release,
+      # set the version to the latest version and the revision to the latest tag SHA.
+      - name: Determine new version and revision
+        if: steps.compare-versions.outputs.update == 'true'
+        id: determine-new-version-and-revision
+        run: |
+          if [ ${{ inputs.update-to-head }} = true ]; then
+            if [ ${{ steps.get-latest-commit.outputs.latest_commit_sha }} != ${{ steps.get-latest-tag-sha.outputs.latest_tag_sha }} ]; then
+              new_version=$(semver -i patch ${{ steps.get-used-version.outputs.version }})
+            else
+              new_version=${{ steps.get-latest-release.outputs.latest_version }}
+            fi
+            new_revision=${{ steps.get-latest-commit.outputs.latest_commit_sha }}
+          else
+            new_version=${{ steps.get-latest-release.outputs.latest_version }}
+            new_revision=${{ steps.get-latest-tag-sha.outputs.latest_tag_sha }}
+          fi
+          echo "new_version=$new_version"
+          echo "new_revision=$new_revision"
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+          echo "new_revision=$new_revision" >> $GITHUB_OUTPUT
       # Update the MQT Core version and revision in the `cmake/ExternalDependencies.cmake` file.
       - name: Update MQT Core version and revision
         id: update-version
         if: steps.compare-versions.outputs.update == 'true'
         run: |
-          sed -i 's/set(MQT_CORE_VERSION.*/set(MQT_CORE_VERSION ${{ steps.get-latest-release.outputs.latest_version }}/' cmake/ExternalDependencies.cmake
-          sed -i 's/set(MQT_CORE_REV.*/set(MQT_CORE_REV "${{ steps.get-latest-release.outputs.latest_commit }}"/' cmake/ExternalDependencies.cmake
+          sed -i 's/set(MQT_CORE_VERSION.*/set(MQT_CORE_VERSION ${{ steps.detemine-new-version-and-revision.outputs.new_version }}/' cmake/ExternalDependencies.cmake
+          sed -i 's/set(MQT_CORE_REV.*/set(MQT_CORE_REV "${{ steps.detemine-new-version-and-revision.outputs.new_revision }}"' cmake/ExternalDependencies.cmake
           git diff
       # Create a pull request to merge the changes into the main branch.
       - name: Create pull request
@@ -89,9 +140,9 @@ jobs:
           commit-message: "⬆️ Update `cda-tum/mqt-core`"
           title: "⬆️ Update `cda-tum/mqt-core`"
           body: |
-            This pull request updates the https://github.com/cda-tum/mqt-core dependency from cda-tum/mqt-core@${{ steps.get-used-version.outputs.revision }} (version v${{ steps.get-used-version.outputs.version }}) to cda-tum/mqt-core@${{ steps.get-latest-release.outputs.latest_commit }} (version v${{ steps.get-latest-release.outputs.latest_version }}).
+            This pull request updates the https://github.com/cda-tum/mqt-core dependency from cda-tum/mqt-core@${{ steps.get-used-version.outputs.revision }} (version v${{ steps.get-used-version.outputs.version }}) to cda-tum/mqt-core@${{ steps.determine-new-version-and-revision.outputs.new_revision }} (version v${{ steps.determine-new-version-and-revision.outputs.new_version }}).
 
-            **Full Changelog**: https://github.com/cda-tum/mqt-core/compare/${{ steps.get-used-version.outputs.revision }}...${{ steps.get-latest-release.outputs.latest_commit }}
-          branch: "update-mqt-core-${{ steps.get-latest-release.outputs.latest_commit }}"
+            **Full Changelog**: https://github.com/cda-tum/mqt-core/compare/${{ steps.get-used-version.outputs.revision }}...${{ steps.determine-new-version-and-revision.outputs.new_revision }}
+          branch: "update-mqt-core-${{ steps.determine-new-version-and-revision.outputs.new_revision }}"
           labels: "dependencies,c++"
           base: "main"
