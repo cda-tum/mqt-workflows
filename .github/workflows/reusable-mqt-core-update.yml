@@ -6,7 +6,7 @@ on:
         description: "Whether to update to the latest commit on the main branch or the latest release"
         default: false
         type: boolean
-
+        required: false
 jobs:
   update-mqt-core:
     name: ⬆️ Update MQT Core
