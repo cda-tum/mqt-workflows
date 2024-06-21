@@ -26,9 +26,11 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+      # set up uv for faster Python package management
+      - uses: yezz123/setup-uv@v4
       # build the source distribution
       - name: Build SDist
-        run: pipx run build --sdist
+        run: pipx run build --sdist --installer uv
       # check the metadata of the source distribution
       - name: Check metadata
         run: pipx run twine check dist/*
@@ -48,9 +50,11 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+      # set up uv for faster Python package management
+      - uses: yezz123/setup-uv@v4
       # build the wheel
       - name: Build Wheel
-        run: pipx run build --wheel
+        run: pipx run build --wheel --installer uv
       # check the metadata of the wheel
       - name: Check metadata
         run: pipx run twine check dist/*
