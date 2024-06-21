@@ -81,7 +81,7 @@ jobs:
       - name: Compare versions
         id: compare-versions
         run: |
-          if [ ${{ inputs.update-to-head }} = true ]
+          if [ ${{ inputs.update-to-head }} = true ]; then
             if [ ${{ steps.get-used-version.outputs.revision }} != ${{ steps.get-latest-commit.outputs.latest_commit_sha }} ]; then
               update=true
             else
