@@ -81,7 +81,7 @@ jobs:
       - name: Compare versions
         id: compare-versions
         run: |
-          if [ ${{ inputs.update-to-head }} = true ]
+          if [ ${{ inputs.update-to-head }} = true ]; then
             if [ ${{ steps.get-used-version.outputs.revision }} != ${{ steps.get-latest-commit.outputs.latest_commit_sha }} ]; then
               update=true
             else
@@ -128,7 +128,7 @@ jobs:
         if: steps.compare-versions.outputs.update == 'true'
         run: |
           sed -i 's/set(MQT_CORE_VERSION.*/set(MQT_CORE_VERSION ${{ steps.detemine-new-version-and-revision.outputs.new_version }}/' cmake/ExternalDependencies.cmake
-          sed -i 's/set(MQT_CORE_REV.*/set(MQT_CORE_REV "${{ steps.detemine-new-version-and-revision.outputs.new_revision }}"' cmake/ExternalDependencies.cmake
+          sed -i 's/set(MQT_CORE_REV.*/set(MQT_CORE_REV "${{ steps.detemine-new-version-and-revision.outputs.new_revision }}"/' cmake/ExternalDependencies.cmake
           git diff
       # Create a pull request to merge the changes into the main branch.
       - name: Create pull request
@@ -140,7 +140,7 @@ jobs:
           commit-message: "⬆️ Update `cda-tum/mqt-core`"
           title: "⬆️ Update `cda-tum/mqt-core`"
           body: |
-            This pull request updates the https://github.com/cda-tum/mqt-core dependency from cda-tum/mqt-core@${{ steps.get-used-version.outputs.revision }} (version v${{ steps.get-used-version.outputs.version }}) to cda-tum/mqt-core@${{ steps.determine-new-version-and-revision.outputs.new_revision }} (version v${{ steps.determine-new-version-and-revision.outputs.new_version }}).
+            This pull request updates the [cda-tum/mqt-core](https://github.com/cda-tum/mqt-core) dependency from cda-tum/mqt-core@${{ steps.get-used-version.outputs.revision }} (version v${{ steps.get-used-version.outputs.version }}) to cda-tum/mqt-core@${{ steps.determine-new-version-and-revision.outputs.new_revision }} (version v${{ steps.determine-new-version-and-revision.outputs.new_version }}).
 
             **Full Changelog**: https://github.com/cda-tum/mqt-core/compare/${{ steps.get-used-version.outputs.revision }}...${{ steps.determine-new-version-and-revision.outputs.new_revision }}
           branch: "update-mqt-core-${{ steps.determine-new-version-and-revision.outputs.new_revision }}"
