@@ -140,7 +140,7 @@ jobs:
           commit-message: "⬆️ Update `cda-tum/mqt-core`"
           title: "⬆️ Update `cda-tum/mqt-core`"
           body: |
-            This pull request updates the https://github.com/cda-tum/mqt-core dependency from cda-tum/mqt-core@${{ steps.get-used-version.outputs.revision }} (version v${{ steps.get-used-version.outputs.version }}) to cda-tum/mqt-core@${{ steps.determine-new-version-and-revision.outputs.new_revision }} (version v${{ steps.determine-new-version-and-revision.outputs.new_version }}).
+            This pull request updates the [cda-tum/mqt-core](https://github.com/cda-tum/mqt-core) dependency from cda-tum/mqt-core@${{ steps.get-used-version.outputs.revision }} (version v${{ steps.get-used-version.outputs.version }}) to cda-tum/mqt-core@${{ steps.determine-new-version-and-revision.outputs.new_revision }} (version v${{ steps.determine-new-version-and-revision.outputs.new_version }}).
 
             **Full Changelog**: https://github.com/cda-tum/mqt-core/compare/${{ steps.get-used-version.outputs.revision }}...${{ steps.determine-new-version-and-revision.outputs.new_revision }}
           branch: "update-mqt-core-${{ steps.determine-new-version-and-revision.outputs.new_revision }}"
