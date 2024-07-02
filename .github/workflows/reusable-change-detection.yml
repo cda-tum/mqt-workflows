@@ -52,7 +52,7 @@ jobs:
             .github/workflows/reusable-cpp-tests-macos.yml
             .github/workflows/reusable-cpp-tests-windows.yml
             .github/workflows/reusable-cpp-coverage.yml
-            .github/workflows/reusable-cpp-tests-ci.yml
+            .github/workflows/reusable-cpp-ci.yml
             .github/workflows/ci.yml
       - name: Set a flag for running the C++ tests
         if: >-
