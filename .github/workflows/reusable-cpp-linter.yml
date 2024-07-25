@@ -14,6 +14,10 @@ on:
         description: "Additional arguments to pass to CMake"
         default: ""
         type: string
+      cpp-linter-extra-args:
+        description: "Extra arguments to pass to the cpp-linter"
+        default: "-std=c++17"
+        type: string
       setup-z3:
         description: "Whether to set up Z3"
         default: false
@@ -78,7 +82,7 @@ jobs:
           thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
           step-summary: true
           database: "build"
-          extra-args: -std=c++17
+          extra-args: ${{ inputs.cpp-linter-extra-args }}
           files-changed-only: ${{ inputs.files-changed-only }}
       - name: Fail if linter found errors
         if: steps.linter.outputs.checks-failed > 0
