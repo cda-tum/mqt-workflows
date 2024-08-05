@@ -49,7 +49,7 @@ jobs:
         id: baipp
       # reduce the list of Python versions by one if the latest Python version is to be skipped
       - name: 🐍 Conditionally reduce the list of considered Python versions
-        run: echo "supported-python-versions=$(echo '${{ steps.baipp.outputs.supported_python_classifiers_json_array }}' | jq --raw-output 'if ${{ inputs.skip-testing-latest-python }} then .[:-1] else . end')" >> $GITHUB_OUTPUT
+        run: echo "supported-python-versions=$(echo '${{ steps.baipp.outputs.supported_python_classifiers_json_array }}' | jq -rc 'if ${{ inputs.skip-testing-latest-python }} then .[:-1] else . end')" >> $GITHUB_OUTPUT
         id: supported-python-versions
       # determine the maximum supported Python version
       - name: 🐍 Determine maximum supported Python version
