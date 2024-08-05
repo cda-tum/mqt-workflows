@@ -180,7 +180,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.20
         env:
           CIBW_ARCHS_LINUX: ${{ matrix.arch }}
-          CIBW_BUILD: ${{ matrix.python }}-*
+          CIBW_BUILD: ${{ matrix.python }}*
           CIBW_TEST_SKIP: "cp*"
       # upload the wheels as an artifact
       - uses: actions/upload-artifact@v4
