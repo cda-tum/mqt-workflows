@@ -3,6 +3,10 @@ name: 🐍 • CI
 on:
   workflow_call:
     inputs:
+      skip-testing-latest-python:
+        description: "Whether to skip testing on the latest Python version"
+        default: false
+        type: boolean
       setup-z3:
         description: "Whether to set up Z3"
         default: false
@@ -43,12 +47,16 @@ jobs:
       # run the build-and-inspect-python-package action (outputs supported Python versions)
       - uses: hynek/build-and-inspect-python-package@v2
         id: baipp
+      # reduce the list of Python versions by one if the latest Python version is to be skipped
+      - name: 🐍 Conditionally reduce the list of considered Python versions
+        run: echo "supported-python-versions=$(echo '${{ steps.baipp.outputs.supported_python_classifiers_json_array }}' | jq -rc 'if ${{ inputs.skip-testing-latest-python }} then .[:-1] else . end')" >> $GITHUB_OUTPUT
+        id: supported-python-versions
       # determine the maximum supported Python version
       - name: 🐍 Determine maximum supported Python version
-        run: echo "max-python-version=$(echo '${{ steps.baipp.outputs.supported_python_classifiers_json_array }}' | jq --raw-output '.[-1]')" >> $GITHUB_OUTPUT
+        run: echo "max-python-version=$(echo '${{ steps.supported-python-versions.outputs.supported-python-versions }}' | jq --raw-output '.[-1]')" >> $GITHUB_OUTPUT
         id: max-python-version
     outputs:
-      python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
+      python-versions: ${{ steps.supported-python-versions.outputs.supported-python-versions }}
       max-python-version: ${{ steps.max-python-version.outputs.max-python-version }}
 
   python-tests-ubuntu:
