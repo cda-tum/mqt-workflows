@@ -143,6 +143,10 @@ jobs:
             This pull request updates the [cda-tum/mqt-core](https://github.com/cda-tum/mqt-core) dependency from cda-tum/mqt-core@${{ steps.get-used-version.outputs.revision }} (version v${{ steps.get-used-version.outputs.version }}) to cda-tum/mqt-core@${{ steps.determine-new-version-and-revision.outputs.new_revision }} (version v${{ steps.determine-new-version-and-revision.outputs.new_version }}).
 
             **Full Changelog**: https://github.com/cda-tum/mqt-core/compare/${{ steps.get-used-version.outputs.revision }}...${{ steps.determine-new-version-and-revision.outputs.new_revision }}
+
+            > [!NOTE]
+            > This pull request was automatically created by a GitHub Actions workflow, which does not have permissions to trigger other workflows.
+            > Manually close and reopen this pull request to trigger the dependent workflows.
           branch: "update-mqt-core-${{ steps.determine-new-version-and-revision.outputs.new_revision }}"
           labels: "dependencies,c++"
           base: "main"
