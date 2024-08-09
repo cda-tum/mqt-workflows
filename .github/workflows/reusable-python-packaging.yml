@@ -119,7 +119,6 @@ jobs:
 
   build_wheels_emulation:
     if: ${{ !inputs.pure-python }}
-    needs: dist
     name: 🎡 ${{ matrix.arch }}
     runs-on: ubuntu-latest
     strategy:
