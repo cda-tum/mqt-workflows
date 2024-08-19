@@ -109,7 +109,7 @@ jobs:
         run: |
           if [ ${{ inputs.update-to-head }} = true ]; then
             if [ ${{ steps.get-latest-commit.outputs.latest_commit_sha }} != ${{ steps.get-latest-tag-sha.outputs.latest_tag_sha }} ]; then
-              new_version=$(semver -i patch ${{ steps.get-used-version.outputs.version }})
+              new_version=$(semver bump patch ${{ steps.get-used-version.outputs.version }})
             else
               new_version=${{ steps.get-latest-release.outputs.latest_version }}
             fi
