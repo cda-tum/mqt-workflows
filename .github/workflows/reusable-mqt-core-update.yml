@@ -150,3 +150,4 @@ jobs:
           branch: "update-mqt-core-${{ steps.determine-new-version-and-revision.outputs.new_revision }}"
           labels: "dependencies,c++"
           base: "main"
+          sign-commits: "true"
