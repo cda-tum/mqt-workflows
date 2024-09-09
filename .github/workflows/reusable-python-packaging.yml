@@ -87,8 +87,6 @@ jobs:
         uses: cda-tum/setup-z3@v1
         with:
           version: ${{ inputs.z3-version }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
       # optionally set up Z3 (Ubuntu only)
       - if: ${{ inputs.setup-z3 && matrix.runs-on == 'ubuntu-latest' }}
         name: Set environment variables for Z3 installation in manylinux image
