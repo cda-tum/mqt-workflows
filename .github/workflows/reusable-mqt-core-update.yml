@@ -11,6 +11,9 @@ jobs:
   update-mqt-core:
     name: ⬆️ Update MQT Core
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       # Check out the repository
       - uses: actions/checkout@v4
