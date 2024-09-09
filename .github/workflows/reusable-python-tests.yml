@@ -50,11 +50,14 @@ jobs:
       - name: Set up mold as linker (Linux only)
         uses: rui314/setup-mold@v1
       # set up uv for faster Python package management
-      - uses: yezz123/setup-uv@v4
-      # set up nox for convenient testing
-      - uses: wntrblm/nox@2024.04.15
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v2
         with:
-          python-versions: ${{ inputs.python-version }}
+          version: "latest"
+          enable-cache: true
+      # set up nox for convenient testing
+      - name: Set up nox
+        run: uv tool install nox --python ${{ inputs.python-version }} --force-reinstall
       # run the nox minimums session (assumes a nox session named "minimums" exists) with coverage
       - name: Test on 🐍 ${{ inputs.python-version }} with minimal versions
         run: nox -s minimums-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml:coverage-${{ inputs.python-version }}-${{ inputs.runs-on }}.xml

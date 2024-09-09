@@ -27,13 +27,17 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       # set up uv for faster Python package management
-      - uses: yezz123/setup-uv@v4
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v2
+        with:
+          version: "latest"
+          enable-cache: true
       # build the source distribution
       - name: Build SDist
-        run: pipx run build --sdist --installer uv
+        run: uv build --sdist
       # check the metadata of the source distribution
       - name: Check metadata
-        run: pipx run twine check dist/*
+        run: uvx twine check dist/*
       # upload the source distribution as an artifact
       - uses: actions/upload-artifact@v4
         with:
@@ -51,13 +55,17 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       # set up uv for faster Python package management
-      - uses: yezz123/setup-uv@v4
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v2
+        with:
+          version: "latest"
+          enable-cache: true
       # build the wheel
       - name: Build Wheel
-        run: pipx run build --wheel --installer uv
+        run: uv build --wheel
       # check the metadata of the wheel
       - name: Check metadata
-        run: pipx run twine check dist/*
+        run: uvx twine check dist/*
       # upload the wheel as an artifact
       - uses: actions/upload-artifact@v4
         with:
@@ -102,7 +110,11 @@ jobs:
           override_cache_key: wheels-${{ matrix.runs-on }}
       # set up uv for faster Python package management
       - if: matrix.runs-on != 'ubuntu-latest'
-        uses: yezz123/setup-uv@v4
+        name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v2
+        with:
+          version: "latest"
+          enable-cache: true
       # run cibuildwheel to build wheels for the specified Python version
       - uses: pypa/cibuildwheel@v2.20
       - name: Verify clean directory

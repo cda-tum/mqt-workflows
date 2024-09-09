@@ -38,15 +38,15 @@ jobs:
       - name: Set up mold as linker
         uses: rui314/setup-mold@v1
       # set up uv for faster Python package management
-      - uses: yezz123/setup-uv@v4
-      # set up nox for convenient linting
-      - uses: wntrblm/nox@2024.04.15
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v2
         with:
-          python-versions: "3.12"
-      # run the nox lint session (assumes a nox session named "lint" exists, and `mypy` is configured in pre-commit)
+          version: "latest"
+          enable-cache: true
+      - name: Install pre-commit
+        run: uv tool install pre-commit --with pre-commit-uv --force-reinstall
       - name: Run mypy
-        run: nox -s lint -- mypy
+        run: pre-commit run -a mypy
       # run check-sdist to ensure the package sdist is correct
       - name: Run check-sdist
-        run: |
-          pipx run check-sdist --inject-junk
+        run: uvx check-sdist --inject-junk
