@@ -134,7 +134,7 @@ jobs:
       - name: Create pull request
         id: create-pull-request
         if: steps.compare-versions.outputs.update == 'true'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ github.token }}
           commit-message: "⬆️ Update `cda-tum/mqt-core`"
