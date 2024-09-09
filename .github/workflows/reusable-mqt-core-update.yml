@@ -11,6 +11,9 @@ jobs:
   update-mqt-core:
     name: ⬆️ Update MQT Core
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       # Check out the repository
       - uses: actions/checkout@v4
@@ -134,7 +137,7 @@ jobs:
       - name: Create pull request
         id: create-pull-request
         if: steps.compare-versions.outputs.update == 'true'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ github.token }}
           commit-message: "⬆️ Update `cda-tum/mqt-core`"
@@ -150,3 +153,4 @@ jobs:
           branch: "update-mqt-core-${{ steps.determine-new-version-and-revision.outputs.new_revision }}"
           labels: "dependencies,c++"
           base: "main"
+          sign-commits: "true"
