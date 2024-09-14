@@ -25,6 +25,7 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     env:
       FORCE_COLOR: 3
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       # check out the repository (including submodules and all history)
       - uses: actions/checkout@v4
@@ -50,7 +51,11 @@ jobs:
       - name: Set up mold as linker (Linux only)
         uses: rui314/setup-mold@v1
       # set up uv for faster Python package management
-      - uses: yezz123/setup-uv@v4
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v2
+        with:
+          version: "latest"
+          enable-cache: true
       # set up nox for convenient testing
       - uses: wntrblm/nox@2024.04.15
         with:
