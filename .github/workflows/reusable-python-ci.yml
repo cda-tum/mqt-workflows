@@ -3,10 +3,6 @@ name: 🐍 • CI
 on:
   workflow_call:
     inputs:
-      skip-testing-latest-python:
-        description: "Whether to skip testing on the latest Python version"
-        default: false
-        type: boolean
       setup-z3:
         description: "Whether to set up Z3"
         default: false
@@ -42,74 +38,23 @@ jobs:
       # set up mold as linker for faster C++ builds
       - name: Set up mold as linker
         uses: rui314/setup-mold@v1
-      # run the build-and-inspect-python-package action (outputs supported Python versions)
       - uses: hynek/build-and-inspect-python-package@v2
-        id: baipp
-      # reduce the list of Python versions by one if the latest Python version is to be skipped
-      - name: 🐍 Conditionally reduce the list of considered Python versions
-        run: echo "supported-python-versions=$(echo '${{ steps.baipp.outputs.supported_python_classifiers_json_array }}' | jq -rc 'if ${{ inputs.skip-testing-latest-python }} then .[:-1] else . end')" >> $GITHUB_OUTPUT
-        id: supported-python-versions
-      # determine the maximum supported Python version
-      - name: 🐍 Determine maximum supported Python version
-        run: echo "max-python-version=$(echo '${{ steps.supported-python-versions.outputs.supported-python-versions }}' | jq --raw-output '.[-1]')" >> $GITHUB_OUTPUT
-        id: max-python-version
-    outputs:
-      python-versions: ${{ steps.supported-python-versions.outputs.supported-python-versions }}
-      max-python-version: ${{ steps.max-python-version.outputs.max-python-version }}
 
-  python-tests-ubuntu:
-    name: 🐧 ${{ matrix.python-version }}
-    needs: dist
+  python-tests:
+    name: 🐍 ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        # runs Python testing for all supported Python versions on Ubuntu
-        python-version: ${{ fromJson(needs.dist.outputs.python-versions) }}
-    uses: ./.github/workflows/reusable-python-tests.yml
-    with:
-      runs-on: ubuntu-latest
-      python-version: ${{ matrix.python-version }}
-      setup-z3: ${{ inputs.setup-z3 }}
-      z3-version: ${{ inputs.z3-version }}
-
-  python-tests-macos:
-    name: 🍎 ${{ matrix.python-version }} ${{ matrix.runs-on }}
-    needs: [dist]
-    strategy:
-      fail-fast: false
-      matrix:
-        # runs Python testing for the minimum and maximum supported Python versions on macOS
-        python-version:
-          - ${{ fromJson(needs.dist.outputs.python-versions)[0] }}
-          - ${{ needs.dist.outputs.max-python-version }}
-        runs-on: [macos-13, macos-14]
+        runs-on: [ubuntu-latest, macos-13, macos-14, windows-latest]
     uses: ./.github/workflows/reusable-python-tests.yml
     with:
       runs-on: ${{ matrix.runs-on }}
-      python-version: ${{ matrix.python-version }}
-      setup-z3: ${{ inputs.setup-z3 }}
-      z3-version: ${{ inputs.z3-version }}
-
-  python-tests-windows:
-    name: 🏁 ${{ matrix.python-version }}
-    needs: [dist]
-    strategy:
-      fail-fast: false
-      matrix:
-        # runs Python testing for the minimum and maximum supported Python versions on Windows
-        python-version:
-          - ${{ fromJson(needs.dist.outputs.python-versions)[0] }}
-          - ${{ needs.dist.outputs.max-python-version }}
-    uses: ./.github/workflows/reusable-python-tests.yml
-    with:
-      runs-on: windows-latest
-      python-version: ${{ matrix.python-version }}
       setup-z3: ${{ inputs.setup-z3 }}
       z3-version: ${{ inputs.z3-version }}
 
   python-coverage-upload:
     name: 📈
-    needs: [python-tests-ubuntu, python-tests-macos, python-tests-windows]
+    needs: [python-tests]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
