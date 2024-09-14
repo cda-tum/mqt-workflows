@@ -55,15 +55,12 @@ jobs:
         with:
           version: "latest"
           enable-cache: true
-      # set up nox for convenient testing
-      - name: Set up nox
-        run: uv tool install nox --python ${{ inputs.python-version }} --force-reinstall
       # run the nox minimums session (assumes a nox session named "minimums" exists) with coverage
       - name: Test on 🐍 ${{ inputs.python-version }} with minimal versions
-        run: nox -s minimums-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml:coverage-${{ inputs.python-version }}-${{ inputs.runs-on }}.xml
+        run: uvx --python ${{ inputs.python-version }} nox -s minimums-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml:coverage-${{ inputs.python-version }}-${{ inputs.runs-on }}.xml
       # run the nox tests session (assumes a nox session named "tests" exists) with coverage
       - name: Test on 🐍 ${{ inputs.python-version }}
-        run: nox -s tests-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml:coverage-${{ inputs.python-version }}-${{ inputs.runs-on }}.xml --cov-append
+        run: uvx --python ${{ inputs.python-version }} nox -s tests-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml:coverage-${{ inputs.python-version }}-${{ inputs.runs-on }}.xml --cov-append
       # upload the report as an artifact to GitHub so that it can later be uploaded to Codecov
       - name: Upload coverage report for 🐍 ${{ inputs.python-version }} on ${{ inputs.runs-on }}
         uses: actions/upload-artifact@v4
