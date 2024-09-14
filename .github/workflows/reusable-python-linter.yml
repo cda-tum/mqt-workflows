@@ -43,10 +43,8 @@ jobs:
         with:
           version: "latest"
           enable-cache: true
-      - name: Install pre-commit
-        run: uv tool install pre-commit --with pre-commit-uv --force-reinstall
       - name: Run mypy
-        run: pre-commit run -a mypy
+        run: uvx --with pre-commit-uv pre-commit run -a mypy
       # run check-sdist to ensure the package sdist is correct
       - name: Run check-sdist
         run: uvx check-sdist --inject-junk
