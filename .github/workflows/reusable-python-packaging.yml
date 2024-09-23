@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 0
       # set up uv for faster Python package management
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v2
+        uses: astral-sh/setup-uv@v3
         with:
           version: "latest"
           enable-cache: true
@@ -56,7 +56,7 @@ jobs:
           fetch-depth: 0
       # set up uv for faster Python package management
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v2
+        uses: astral-sh/setup-uv@v3
         with:
           version: "latest"
           enable-cache: true
@@ -111,7 +111,7 @@ jobs:
       # set up uv for faster Python package management
       - if: matrix.runs-on != 'ubuntu-latest'
         name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v2
+        uses: astral-sh/setup-uv@v3
         with:
           version: "latest"
           enable-cache: true
