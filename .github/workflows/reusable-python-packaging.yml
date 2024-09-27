@@ -15,6 +15,10 @@ on:
         description: "The version of Z3 to set up"
         default: "4.13.0"
         type: string
+      build-emulated-wheels:
+        description: "Whether to build wheels for platforms that require emulation"
+        default: true
+        type: boolean
 
 jobs:
   build_sdist:
@@ -128,7 +132,7 @@ jobs:
           path: wheelhouse/*.whl
 
   build_wheels_emulation:
-    if: ${{ !inputs.pure-python }}
+    if: ${{ !inputs.pure-python && inputs.build-emulated-wheels }}
     name: 🎡 ${{ matrix.arch }}
     runs-on: ubuntu-latest
     strategy:
