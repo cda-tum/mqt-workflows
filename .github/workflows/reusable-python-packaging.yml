@@ -19,6 +19,10 @@ on:
         description: "Whether to build wheels for platforms that require emulation"
         default: true
         type: boolean
+      no-local-version:
+        description: "Whether to configure setuptools_scm to not use local version identifiers"
+        default: false
+        type: boolean
 
 jobs:
   build_sdist:
@@ -36,6 +40,24 @@ jobs:
         with:
           version: "latest"
           enable-cache: true
+      # workaround for https://github.com/pypa/setuptools-scm/issues/455
+      - if: ${{ inputs.no-local-version }}
+        name: Disable local version identifiers for setuptools_scm
+        run: |
+          uv run --no-project --with tomlkit - <<'EOF'
+          from pathlib import Path
+          import tomlkit
+
+          pyproject_toml_path = Path.cwd() / "pyproject.toml"
+          pyproject_toml_txt = pyproject_toml_path.read_text()
+          pyproject_toml = tomlkit.loads(pyproject_toml_txt)
+          setuptools_scm_section = pyproject_toml["tool"]["setuptools_scm"]
+          setuptools_scm_section["local_scheme"] = "no-local-version"
+          patched_pyproject_toml_txt = tomlkit.dumps(pyproject_toml)
+          pyproject_toml_path.write_text(patched_pyproject_toml_txt)
+          EOF
+          git diff --color=always
+          git update-index --assume-unchanged pyproject.toml
       # build the source distribution
       - name: Build SDist
         run: uv build --sdist
@@ -64,6 +86,24 @@ jobs:
         with:
           version: "latest"
           enable-cache: true
+      # workaround for https://github.com/pypa/setuptools-scm/issues/455
+      - if: ${{ inputs.no-local-version }}
+        name: Disable local version identifiers for setuptools_scm
+        run: |
+          uv run --no-project --with tomlkit - <<'EOF'
+          from pathlib import Path
+          import tomlkit
+
+          pyproject_toml_path = Path.cwd() / "pyproject.toml"
+          pyproject_toml_txt = pyproject_toml_path.read_text()
+          pyproject_toml = tomlkit.loads(pyproject_toml_txt)
+          setuptools_scm_section = pyproject_toml["tool"]["setuptools_scm"]
+          setuptools_scm_section["local_scheme"] = "no-local-version"
+          patched_pyproject_toml_txt = tomlkit.dumps(pyproject_toml)
+          pyproject_toml_path.write_text(patched_pyproject_toml_txt)
+          EOF
+          git diff --color=always
+          git update-index --assume-unchanged pyproject.toml
       # build the wheel
       - name: Build Wheel
         run: uv build --wheel
@@ -113,12 +153,30 @@ jobs:
           windows_compile_environment: msvc
           override_cache_key: wheels-${{ matrix.runs-on }}
       # set up uv for faster Python package management
-      - if: matrix.runs-on != 'ubuntu-latest'
-        name: Install the latest version of uv
+      - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v3
         with:
           version: "latest"
           enable-cache: true
+      # workaround for https://github.com/pypa/setuptools-scm/issues/455
+      - if: ${{ inputs.no-local-version }}
+        name: Disable local version identifiers for setuptools_scm
+        shell: bash
+        run: |
+          uv run --no-project --with tomlkit - <<'EOF'
+          from pathlib import Path
+          import tomlkit
+
+          pyproject_toml_path = Path.cwd() / "pyproject.toml"
+          pyproject_toml_txt = pyproject_toml_path.read_text()
+          pyproject_toml = tomlkit.loads(pyproject_toml_txt)
+          setuptools_scm_section = pyproject_toml["tool"]["setuptools_scm"]
+          setuptools_scm_section["local_scheme"] = "no-local-version"
+          patched_pyproject_toml_txt = tomlkit.dumps(pyproject_toml)
+          pyproject_toml_path.write_text(patched_pyproject_toml_txt)
+          EOF
+          git diff --color=always
+          git update-index --assume-unchanged pyproject.toml
       # run cibuildwheel to build wheels for the specified Python version
       - uses: pypa/cibuildwheel@v2.21
       - name: Verify clean directory
@@ -154,6 +212,30 @@ jobs:
         name: Set environment variables for Z3 installation in manylinux image
         run: |
           echo "CIBW_BEFORE_ALL_LINUX=/opt/python/cp311-cp311/bin/pip install z3-solver==${{ inputs.z3-version }}" >> $GITHUB_ENV
+      # set up uv for faster Python package management
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+      # workaround for https://github.com/pypa/setuptools-scm/issues/455
+      - if: ${{ inputs.no-local-version }}
+        name: Disable local version identifiers for setuptools_scm
+        run: |
+          uv run --no-project --with tomlkit - <<'EOF'
+          from pathlib import Path
+          import tomlkit
+
+          pyproject_toml_path = Path.cwd() / "pyproject.toml"
+          pyproject_toml_txt = pyproject_toml_path.read_text()
+          pyproject_toml = tomlkit.loads(pyproject_toml_txt)
+          setuptools_scm_section = pyproject_toml["tool"]["setuptools_scm"]
+          setuptools_scm_section["local_scheme"] = "no-local-version"
+          patched_pyproject_toml_txt = tomlkit.dumps(pyproject_toml)
+          pyproject_toml_path.write_text(patched_pyproject_toml_txt)
+          EOF
+          git diff --color=always
+          git update-index --assume-unchanged pyproject.toml
       # run cibuildwheel to build wheels for the specified Python version
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.21
