@@ -64,10 +64,10 @@ jobs:
       # check the metadata of the source distribution
       - name: Check metadata
         run: uvx twine check dist/*
-      # upload the source distribution as an artifact
+      # upload the source distribution as an artifact (adds `dev-` and `test-` prefixes for PRs and continuous deployment, respectively)
       - uses: actions/upload-artifact@v4
         with:
-          name: cibw-sdist
+          name: ${{ github.event_name == 'pull_request' && 'dev-' || inputs.no-local-version && 'test-' || '' }}cibw-sdist
           path: dist/*.tar.gz
 
   build_wheel:
@@ -110,10 +110,10 @@ jobs:
       # check the metadata of the wheel
       - name: Check metadata
         run: uvx twine check dist/*
-      # upload the wheel as an artifact
+      # upload the wheel as an artifact (adds `dev-` and `test-` prefixes for PRs and continuous deployment, respectively)
       - uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheel
+          name: ${{ github.event_name == 'pull_request' && 'dev-' || inputs.no-local-version && 'test-' || '' }}cibw-wheel
           path: dist/*.whl
 
   build_wheels:
@@ -182,11 +182,11 @@ jobs:
       - name: Verify clean directory
         run: git diff --exit-code
         shell: bash
-      # upload the wheels as an artifact
+      # upload the wheels as an artifact (adds `dev-` and `test-` prefixes for PRs and continuous deployment, respectively)
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.runs-on }}-${{ strategy.job-index }}
+          name: ${{ github.event_name == 'pull_request' && 'dev-' || inputs.no-local-version && 'test-' || '' }}cibw-wheels-${{ matrix.runs-on }}-${{ strategy.job-index }}
           path: wheelhouse/*.whl
 
   build_wheels_emulation:
@@ -242,8 +242,8 @@ jobs:
         env:
           CIBW_ARCHS_LINUX: ${{ matrix.arch }}
           CIBW_TEST_SKIP: "cp*"
-      # upload the wheels as an artifact
+      # upload the wheels as an artifact (adds `dev-` and `test-` prefixes for PRs and continuous deployment, respectively)
       - uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.arch }}-${{ strategy.job-index }}
+          name: ${{ github.event_name == 'pull_request' && 'dev-' || inputs.no-local-version && 'test-' || '' }}cibw-wheels-${{ matrix.arch }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
