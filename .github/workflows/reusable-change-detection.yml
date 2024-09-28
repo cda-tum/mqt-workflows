@@ -150,7 +150,7 @@ jobs:
       - name: Set a flag for running the continuous deployment job
         if: >-
           github.event_name == 'pull_request'
-          && steps.changed-code-ql-files.outputs.added_modified_renamed != ''
+          && steps.changed-cd-files.outputs.added_modified_renamed != ''
         id: cd-changes
         run: >-
           echo "run-cd=true" >> "${GITHUB_OUTPUT}"
