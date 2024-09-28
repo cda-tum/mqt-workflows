@@ -148,9 +148,7 @@ jobs:
           filter: |
             .github/workflows/cd.yml
       - name: Set a flag for running the continuous deployment job
-        if: >-
-          github.event_name != 'pull_request'
-          || steps.changed-cd-files.outputs.added_modified_renamed != ''
+        if: steps.changed-cd-files.outputs.added_modified_renamed != ''
         id: cd-changes
         run: >-
           echo "run-cd=true" >> "${GITHUB_OUTPUT}"
