@@ -102,6 +102,7 @@ jobs:
             test/python/**
             noxfile.py
             pyproject.toml
+            uv.lock
             CMakeLists.txt
             .github/codecov.yml
             .github/workflows/reusable-python-linter.yml
