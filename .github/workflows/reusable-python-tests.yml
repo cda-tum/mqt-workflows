@@ -53,7 +53,7 @@ jobs:
           version: "latest"
           enable-cache: true
       # set up nox for convenient testing
-      - uses: wntrblm/nox@2024.04.15
+      - uses: wntrblm/nox@2024.10.09
       # run the nox minimums session (assumes a nox session named "minimums" exists) with coverage
       - name: 🐍 Test with minimal versions
         run: nox -s minimums --verbose -- --cov --cov-report=xml:coverage-${{ inputs.runs-on }}.xml --cov-append
