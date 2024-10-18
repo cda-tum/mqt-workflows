@@ -73,4 +73,4 @@ jobs:
         with:
           fail_ci_if_error: true
           flags: python
-          use_oidc: true
+          use_oidc: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
