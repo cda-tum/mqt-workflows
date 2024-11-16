@@ -99,7 +99,8 @@ jobs:
             extern/**
             include/**
             src/**
-            test/python/**
+            test/**/*.py
+            tests/**/*.py
             noxfile.py
             pyproject.toml
             uv.lock
