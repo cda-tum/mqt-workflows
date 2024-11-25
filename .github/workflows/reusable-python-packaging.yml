@@ -36,7 +36,7 @@ jobs:
           fetch-depth: 0
       # set up uv for faster Python package management
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
           enable-cache: true
@@ -82,7 +82,7 @@ jobs:
           fetch-depth: 0
       # set up uv for faster Python package management
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
           enable-cache: true
@@ -154,7 +154,7 @@ jobs:
           override_cache_key: wheels-${{ matrix.runs-on }}
       # set up uv for faster Python package management
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
           enable-cache: true
@@ -178,7 +178,7 @@ jobs:
           git diff --color=always
           git update-index --assume-unchanged pyproject.toml
       # run cibuildwheel to build wheels for the specified Python version
-      - uses: pypa/cibuildwheel@v2.21
+      - uses: pypa/cibuildwheel@v2.22
       - name: Verify clean directory
         run: git diff --exit-code
         shell: bash
@@ -214,7 +214,7 @@ jobs:
           echo "CIBW_BEFORE_ALL_LINUX=/opt/python/cp311-cp311/bin/pip install z3-solver==${{ inputs.z3-version }}" >> $GITHUB_ENV
       # set up uv for faster Python package management
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
           enable-cache: true
@@ -238,7 +238,7 @@ jobs:
           git update-index --assume-unchanged pyproject.toml
       # run cibuildwheel to build wheels for the specified Python version
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.21
+        uses: pypa/cibuildwheel@v2.22
         env:
           CIBW_ARCHS_LINUX: ${{ matrix.arch }}
           CIBW_TEST_SKIP: "cp*"
