@@ -22,6 +22,7 @@ jobs:
     strategy:
       matrix:
         runs-on: [macos-13, macos-14] # Tests on the Intel and arm64 architectures
+      fail-fast: false # Continue with other jobs if one fails
     env:
       CMAKE_BUILD_PARALLEL_LEVEL: 4
       CTEST_PARALLEL_LEVEL: 4
