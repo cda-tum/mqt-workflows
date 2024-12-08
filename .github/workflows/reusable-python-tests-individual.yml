@@ -6,6 +6,14 @@ on:
         description: "The platform to run the tests on"
         required: true
         type: string
+      python-version:
+        description: "The Python version to use"
+        required: true
+        type: string
+      session:
+        description: "The nox session to run (typically 'tests' or 'minimums')"
+        required: true
+        type: string
       setup-z3:
         description: "Whether to set up Z3"
         default: false
@@ -17,7 +25,7 @@ on:
 
 jobs:
   python-tests:
-    name: 🐍 ${{ inputs.python-version }} ${{ inputs.runs-on }}
+    name: 🐍 ${{ inputs.session }} ${{ inputs.python-version }} ${{ inputs.runs-on }}
     runs-on: ${{ inputs.runs-on }}
     env:
       FORCE_COLOR: 3
@@ -42,7 +50,7 @@ jobs:
         with:
           prepend_symlinks_to_path: false
           windows_compile_environment: msvc
-          override_cache_key: python-tests-${{ inputs.runs-on }}
+          override_cache_key: python-tests-${{ inputs.runs-on }}-${{ inputs.python-version }}-${{ inputs.session }}
       # set up mold as linker for faster C++ builds (Linux only)
       - name: Set up mold as linker (Linux only)
         uses: rui314/setup-mold@v1
@@ -52,17 +60,12 @@ jobs:
         with:
           version: "latest"
           enable-cache: true
-      # set up nox for convenient testing
-      - uses: wntrblm/nox@2024.10.09
-      # run the nox minimums session (assumes a nox session named "minimums" exists) with coverage
-      - name: Test on 🐍 ${{ inputs.python-version }} with minimal versions
-        run: nox -s minimums-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml
-      # run the nox tests session (assumes a nox session named "tests" exists) with coverage
+      # run the nox session (assumes a corresponding nox session exists) with coverage
       - name: Test on 🐍 ${{ inputs.python-version }}
-        run: nox -s tests-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml --cov-append
+        run: uvx nox -s ${{ inputs.session }}-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml
       # upload the report as an artifact to GitHub so that it can later be uploaded to Codecov
-      - name: Upload 🐍 coverage report for ${{ inputs.runs-on }}
+      - name: Upload 🐍 coverage report for the ${{ inputs.session }} session on 🐍 ${{ inputs.python-version }} running ${{ inputs.runs-on }}
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ inputs.runs-on }}
+          name: coverage-${{ inputs.session }}-${{ inputs.python-version }}-${{ inputs.runs-on }}
           path: coverage-*
