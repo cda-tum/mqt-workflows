@@ -157,7 +157,7 @@ jobs:
         uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
-          enable-cache: true
+          enable-cache: ${{ matrix.runs-on != 'ubuntu-latest' }}
       # workaround for https://github.com/pypa/setuptools-scm/issues/455
       - if: ${{ inputs.no-local-version }}
         name: Disable local version identifiers for setuptools_scm
@@ -217,7 +217,6 @@ jobs:
         uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
-          enable-cache: true
       # workaround for https://github.com/pypa/setuptools-scm/issues/455
       - if: ${{ inputs.no-local-version }}
         name: Disable local version identifiers for setuptools_scm
