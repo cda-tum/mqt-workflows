@@ -88,8 +88,33 @@ jobs:
       z3-version: ${{ inputs.z3-version }}
 
   python-coverage-upload:
+    if: ${{ !inputs.run-tests-individually }}
     name: 📈
     needs: [python-tests]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Required for the `actions/checkout` action
+      id-token: write # Required for the `codecov/codecov-action` action
+    steps:
+      # check out the repository (mostly for the codecov config)
+      - uses: actions/checkout@v4
+      # download coverage reports from all jobs
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: coverage-reports
+          merge-multiple: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          fail_ci_if_error: true
+          flags: python
+          use_oidc: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
+
+  python-coverage-upload-individual:
+    if: ${{ inputs.run-tests-individually }}
+    name: 📈
+    needs: [python-tests-individual]
     runs-on: ubuntu-latest
     permissions:
       contents: read # Required for the `actions/checkout` action
