@@ -71,6 +71,7 @@ jobs:
 
   python-tests-individual:
     if: ${{ inputs.run-tests-individually }}
+    needs: [dist]
     name: 🐍 ${{ matrix.session }} ${{ matrix.python-version }} ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
