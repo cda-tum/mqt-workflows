@@ -62,7 +62,7 @@ jobs:
           enable-cache: true
       # run the nox session (assumes a corresponding nox session exists) with coverage
       - name: Test on 🐍 ${{ inputs.python-version }}
-        run: uvx nox -s ${{ inputs.session }}-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml
+        run: uvx nox -s ${{ inputs.session }}-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml:coverage-${{ inputs.session }}-${{ inputs.python-version }}-${{ inputs.runs-on }}.xml
       # upload the report as an artifact to GitHub so that it can later be uploaded to Codecov
       - name: Upload 🐍 coverage report for the ${{ inputs.session }} session on 🐍 ${{ inputs.python-version }} running ${{ inputs.runs-on }}
         uses: actions/upload-artifact@v4
