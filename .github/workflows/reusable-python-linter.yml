@@ -39,10 +39,9 @@ jobs:
         uses: rui314/setup-mold@v1
       # set up uv for faster Python package management
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
-          enable-cache: true
       - name: Run mypy
         run: uvx --with pre-commit-uv pre-commit run -a mypy
       # run check-sdist to ensure the package sdist is correct

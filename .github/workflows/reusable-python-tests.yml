@@ -48,10 +48,9 @@ jobs:
         uses: rui314/setup-mold@v1
       # set up uv for faster Python package management
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
-          enable-cache: true
       # set up nox for convenient testing
       - uses: wntrblm/nox@2024.10.09
       # run the nox minimums session (assumes a nox session named "minimums" exists) with coverage

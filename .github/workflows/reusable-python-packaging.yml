@@ -36,7 +36,7 @@ jobs:
           fetch-depth: 0
       # set up uv for faster Python package management
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
           enable-cache: true
@@ -82,10 +82,9 @@ jobs:
           fetch-depth: 0
       # set up uv for faster Python package management
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
-          enable-cache: true
       # workaround for https://github.com/pypa/setuptools-scm/issues/455
       - if: ${{ inputs.no-local-version }}
         name: Disable local version identifiers for setuptools_scm
@@ -154,7 +153,7 @@ jobs:
           override_cache_key: wheels-${{ matrix.runs-on }}
       # set up uv for faster Python package management
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
           enable-cache: ${{ matrix.runs-on != 'ubuntu-latest' }}
@@ -214,9 +213,10 @@ jobs:
           echo "CIBW_BEFORE_ALL_LINUX=/opt/python/cp311-cp311/bin/pip install z3-solver==${{ inputs.z3-version }}" >> $GITHUB_ENV
       # set up uv for faster Python package management
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
+          enable-cache: false
       # workaround for https://github.com/pypa/setuptools-scm/issues/455
       - if: ${{ inputs.no-local-version }}
         name: Disable local version identifiers for setuptools_scm
