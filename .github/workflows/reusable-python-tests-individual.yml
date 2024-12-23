@@ -59,7 +59,6 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
-          enable-cache: true
       # run the nox session (assumes a corresponding nox session exists) with coverage
       - name: Test on 🐍 ${{ inputs.python-version }}
         run: uvx nox -s ${{ inputs.session }}-${{ inputs.python-version }} --verbose -- --cov --cov-report=xml:coverage-${{ inputs.session }}-${{ inputs.python-version }}-${{ inputs.runs-on }}.xml
