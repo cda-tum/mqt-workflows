@@ -21,8 +21,12 @@ on:
 
 jobs:
   cpp-tests-ubuntu:
-    name: 🐧 ${{ inputs.config }}
-    runs-on: ubuntu-latest
+    name: 🐧 ${{ matrix.runs-on }} ${{ inputs.config }}
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      matrix:
+        runs-on: [ubuntu-24.04, ubuntu-24.04-arm]
+      fail-fast: false # Continue with other jobs if one fails
     env:
       CMAKE_BUILD_PARALLEL_LEVEL: 4
       CTEST_PARALLEL_LEVEL: 4
