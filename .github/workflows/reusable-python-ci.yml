@@ -63,7 +63,17 @@ jobs:
       fail-fast: false
       matrix:
         runs-on:
-          [ubuntu-24.04, ubuntu-24.04-arm, macos-13, macos-14, windows-latest]
+          [
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            ubuntu-24.04,
+            ubuntu-24.04-arm,
+            macos-13,
+            macos-14,
+            macos-15,
+            windows-2022,
+            windows-2025,
+          ]
     uses: ./.github/workflows/reusable-python-tests.yml
     with:
       runs-on: ${{ matrix.runs-on }}
@@ -78,7 +88,17 @@ jobs:
       fail-fast: false
       matrix:
         runs-on:
-          [ubuntu-24.04, ubuntu-24.04-arm, macos-13, macos-14, windows-latest]
+          [
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            ubuntu-24.04,
+            ubuntu-24.04-arm,
+            macos-13,
+            macos-14,
+            macos-15,
+            windows-2022,
+            windows-2025,
+          ]
         python-version: ${{ fromJson(needs.dist.outputs.python-versions) }}
         session: ["minimums", "tests"]
     uses: ./.github/workflows/reusable-python-tests-individual.yml
