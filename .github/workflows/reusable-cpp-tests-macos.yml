@@ -2,6 +2,10 @@ name: 🇨 • Tests • macos-latest
 on:
   workflow_call:
     inputs:
+      config:
+        description: "The configuration to use (Debug or Release)"
+        required: true
+        type: string
       cmake-args:
         description: "Additional arguments to pass to CMake"
         default: "-G Ninja"
@@ -17,11 +21,11 @@ on:
 
 jobs:
   cpp-tests-macos:
-    name: 🍎 ${{ matrix.runs-on }}
+    name: 🍎 ${{ matrix.runs-on }} ${{ inputs.config }}
     runs-on: ${{ matrix.runs-on }}
     strategy:
       matrix:
-        runs-on: [macos-13, macos-14] # Tests on the Intel and arm64 architectures
+        runs-on: [macos-13, macos-14, macos-15] # Tests on the Intel and arm64 architectures
       fail-fast: false # Continue with other jobs if one fails
     env:
       CMAKE_BUILD_PARALLEL_LEVEL: 4
@@ -44,28 +48,16 @@ jobs:
         uses: Chocobo1/setup-ccache-action@v1
         with:
           prepend_symlinks_to_path: false
-          override_cache_key: c++-tests-${{ matrix.runs-on }}
+          override_cache_key: c++-tests-${{ matrix.runs-on }}-${{ inputs.config }}
       # make sure ninja is installed
       - name: Install Ninja
         run: brew install ninja
-
-      # Runs tests in both, Debug and Release modes, on macOS. This reduces the number of concurrent runners needed.
-
-      # configure CMake in Debug mode, optionally with additional arguments
-      - name: Configure CMake (Debug)
-        run: cmake -S . -B build_debug -DCMAKE_BUILD_TYPE=Debug ${{ inputs.cmake-args }}
-      # build the project in Debug mode
-      - name: Build (Debug)
-        run: cmake --build build_debug --config Debug
-      # run the tests in Debug mode
-      - name: Test (Debug)
-        run: ctest -C Debug --output-on-failure --test-dir build_debug --repeat until-pass:3 --timeout 600
-      # configure CMake in Release mode, optionally with additional arguments
-      - name: Configure CMake (Release)
-        run: cmake -S . -B build_release -DCMAKE_BUILD_TYPE=Release ${{ inputs.cmake-args }}
-      # build the project in Release mode
-      - name: Build (Release)
-        run: cmake --build build_release --config Release
-      # run the tests in Release mode
-      - name: Test (Release)
-        run: ctest -C Release --output-on-failure --test-dir build_release --repeat until-pass:3 --timeout 600
+      # configure CMake in the specified mode, optionally with additional arguments
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ inputs.config }} ${{ inputs.cmake-args }}
+      # build the project in the specified mode
+      - name: Build
+        run: cmake --build build --config ${{ inputs.config }}
+      # run the tests
+      - name: Test
+        run: ctest -C ${{ inputs.config }} --output-on-failure --test-dir build --repeat until-pass:3 --timeout 600

@@ -25,7 +25,8 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     strategy:
       matrix:
-        runs-on: [ubuntu-24.04, ubuntu-24.04-arm]
+        runs-on:
+          [ubuntu-22.04, ubuntu-24.04, ubuntu-22.04-arm, ubuntu-24.04-arm]
       fail-fast: false # Continue with other jobs if one fails
     env:
       CMAKE_BUILD_PARALLEL_LEVEL: 4
@@ -48,7 +49,7 @@ jobs:
         uses: Chocobo1/setup-ccache-action@v1
         with:
           prepend_symlinks_to_path: false
-          override_cache_key: c++-tests-ubuntu-latest-${{ inputs.config }}
+          override_cache_key: c++-tests-${{ matrix.runs-on }}-${{ inputs.config }}
       # set up mold as linker for faster C++ builds
       - name: Set up mold as linker
         uses: rui314/setup-mold@v1

@@ -25,8 +25,12 @@ defaults:
 
 jobs:
   cpp-tests-windows:
-    name: 🏁 ${{ inputs.config }}
-    runs-on: windows-latest
+    name: 🏁 ${{ matrix.runs-on }} ${{ inputs.config }}
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      matrix:
+        runs-on: [windows-2022, windows-2025]
+      fail-fast: false # Continue with other jobs if one fails
     env:
       CMAKE_BUILD_PARALLEL_LEVEL: 4
       CTEST_PARALLEL_LEVEL: 4
@@ -51,7 +55,7 @@ jobs:
         with:
           prepend_symlinks_to_path: false
           windows_compile_environment: msvc
-          override_cache_key: c++-tests-windows-latest-${{ inputs.config }}
+          override_cache_key: c++-tests-${{ matrix.runs-on }}-${{ inputs.config }}
       # configure CMake in the specified mode, optionally with additional arguments
       - name: Configure CMake
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ inputs.config }} ${{ inputs.cmake-args }}
