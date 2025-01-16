@@ -37,9 +37,6 @@ jobs:
       # set up uv for faster Python package management
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v5
-        with:
-          version: "latest"
-          enable-cache: true
       # workaround for https://github.com/pypa/setuptools-scm/issues/455
       - if: ${{ inputs.no-local-version }}
         name: Disable local version identifiers for setuptools_scm
@@ -83,8 +80,6 @@ jobs:
       # set up uv for faster Python package management
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v5
-        with:
-          version: "latest"
       # workaround for https://github.com/pypa/setuptools-scm/issues/455
       - if: ${{ inputs.no-local-version }}
         name: Disable local version identifiers for setuptools_scm
@@ -155,7 +150,6 @@ jobs:
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v5
         with:
-          version: "latest"
           enable-cache: ${{ matrix.runs-on != 'ubuntu-latest' }}
       # workaround for https://github.com/pypa/setuptools-scm/issues/455
       - if: ${{ inputs.no-local-version }}
@@ -215,7 +209,6 @@ jobs:
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v5
         with:
-          version: "latest"
           enable-cache: false
       # workaround for https://github.com/pypa/setuptools-scm/issues/455
       - if: ${{ inputs.no-local-version }}
