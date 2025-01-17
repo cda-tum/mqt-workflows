@@ -49,14 +49,12 @@ jobs:
       # set up uv for faster Python package management
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v5
-      # set up nox for convenient testing
-      - uses: wntrblm/nox@2024.10.09
       # run the nox minimums session (assumes a nox session named "minimums" exists) with coverage
       - name: 🐍 Test with minimal versions
-        run: nox -s minimums --verbose -- --cov --cov-report=xml:coverage-${{ inputs.runs-on }}.xml --cov-append
+        run: uvx nox -s minimums --verbose -- --cov --cov-report=xml:coverage-${{ inputs.runs-on }}.xml --cov-append
       # run the nox tests session (assumes a nox session named "tests" exists) with coverage
       - name: 🐍 Test
-        run: nox -s tests --verbose -- --cov --cov-report=xml:coverage-${{ inputs.runs-on }}.xml --cov-append
+        run: uvx nox -s tests --verbose -- --cov --cov-report=xml:coverage-${{ inputs.runs-on }}.xml --cov-append
       # upload the report as an artifact to GitHub so that it can later be uploaded to Codecov
       - name: Upload 🐍 coverage report for ${{ inputs.runs-on }}
         uses: actions/upload-artifact@v4
