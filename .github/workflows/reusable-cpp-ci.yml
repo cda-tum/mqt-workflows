@@ -264,7 +264,7 @@ jobs:
           if [ "${{ inputs.enable-ubuntu2204-arm-clang-debug }}" == "true" ]; then
             matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-22.04-arm", "config": "Debug", "compiler": "clang"}]')
           fi
-          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "matrix=$(echo $matrix | jq -rc .)" >> $GITHUB_OUTPUT
       - id: build-macos-matrix
         run: |
           matrix='[]'
@@ -304,7 +304,7 @@ jobs:
           if [ "${{ inputs.enable-macos15-gcc-debug }}" == "true" ]; then
             matrix=$(echo $matrix | jq '. += [{"runs-on": "macos-15", "config": "Debug", "compiler": "gcc"}]')
           fi
-          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "matrix=$(echo $matrix | jq -rc .)" >> $GITHUB_OUTPUT
       - id: build-windows-matrix
         run: |
           matrix='[]'
@@ -332,7 +332,7 @@ jobs:
           if [ "${{ inputs.enable-windows2025-clang-debug }}" == "true" ]; then
             matrix=$(echo $matrix | jq '. += [{"runs-on": "windows-2025", "config": "Debug", "compiler": "clang"}]')
           fi
-          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "matrix=$(echo $matrix | jq -rc .)" >> $GITHUB_OUTPUT
 
   cpp-tests-ubuntu:
     name: 🐧 ${{ matrix.runs-on }} ${{ matrix.compiler }} ${{ matrix.config }}
