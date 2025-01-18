@@ -2,13 +2,31 @@ name: 🇨 • Tests • windows-latest
 on:
   workflow_call:
     inputs:
+      runs-on:
+        description: >
+          The Windows runner image to use. Defaults to 'windows-latest'.
+          This can be any valid Windows runner image, such as 'windows-2022' or 'windows-2025'.
+        default: "windows-latest"
+        type: string
       config:
-        description: "The configuration to use (Debug or Release)"
-        required: true
+        description: >
+          The build type to use. Defaults to 'Release'.
+          This can be any valid CMake build type, such as 'Debug' or 'Release'.
+        default: "Release"
+        type: string
+      compiler:
+        description: >
+          The compiler to use. Defaults to 'msvc'.
+          This can be 'msvc' or 'clang'.
+          If 'msvc' is selected, '-G Ninja' is automatically added to the CMake arguments.
+          If 'clang' is selected, '-T ClangCL' is automatically added to the CMake arguments.
+        default: "msvc"
         type: string
       cmake-args:
-        description: "Additional arguments to pass to CMake"
-        default: "-G Ninja"
+        description: >
+          Additional arguments to pass to CMake. Defaults to an empty string.
+          This can be any valid CMake argument, such as '-DBUILD_SHARED_LIBS=ON'.
+        default: ""
         type: string
       setup-z3:
         description: "Whether to set up Z3"
@@ -25,12 +43,8 @@ defaults:
 
 jobs:
   cpp-tests-windows:
-    name: 🏁 ${{ matrix.runs-on }} ${{ inputs.config }}
-    runs-on: ${{ matrix.runs-on }}
-    strategy:
-      matrix:
-        runs-on: [windows-2022, windows-2025]
-      fail-fast: false # Continue with other jobs if one fails
+    name: 🏁 ${{ inputs.runs-on }} ${{ inputs.config }}
+    runs-on: ${{ inputs.runs-on }}
     env:
       CMAKE_BUILD_PARALLEL_LEVEL: 4
       CTEST_PARALLEL_LEVEL: 4
@@ -51,7 +65,14 @@ jobs:
           version: ${{ inputs.z3-version }}
       # configure CMake in the specified mode, optionally with additional arguments
       - name: Configure CMake
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ inputs.config }} ${{ inputs.cmake-args }}
+        run: |
+          cmake_args="${{ inputs.cmake-args }}"
+          if [ "${{ inputs.compiler }}" == "msvc" ]; then
+            cmake_args="$cmake_args -G Ninja"
+          elif [ "${{ inputs.compiler }}" == "clang" ]; then
+            cmake_args="$cmake_args -T ClangCL"
+          fi
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ inputs.config }} $cmake_args
       # build the project in the specified mode with retries
       - name: Build
         uses: nick-fields/retry@v3 # Windows builds with MSVC are flaky and frequently run out of heap space
