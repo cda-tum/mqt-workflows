@@ -1,4 +1,4 @@
-name: 🇨 • Tests • macos-latest
+name: 🇨 • Tests • macos
 on:
   workflow_call:
     inputs:
@@ -39,7 +39,7 @@ on:
 
 jobs:
   cpp-tests-macos:
-    name: 🍎 ${{ inputs.runs-on }} ${{ inputs.config }}
+    name: 🍎 ${{ inputs.runs-on }} ${{ inputs.compiler }} ${{ inputs.config }}
     runs-on: ${{ inputs.runs-on }}
     env:
       CMAKE_BUILD_PARALLEL_LEVEL: 4

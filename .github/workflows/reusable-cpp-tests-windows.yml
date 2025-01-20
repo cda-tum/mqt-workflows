@@ -1,4 +1,4 @@
-name: 🇨 • Tests • windows-latest
+name: 🇨 • Tests • windows
 on:
   workflow_call:
     inputs:
@@ -43,7 +43,7 @@ defaults:
 
 jobs:
   cpp-tests-windows:
-    name: 🏁 ${{ inputs.runs-on }} ${{ inputs.config }}
+    name: 🏁 ${{ inputs.runs-on }} ${{ inputs.compiler }} ${{ inputs.config }}
     runs-on: ${{ inputs.runs-on }}
     env:
       CMAKE_BUILD_PARALLEL_LEVEL: 4
