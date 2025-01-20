@@ -209,130 +209,136 @@ jobs:
   build-matrices:
     runs-on: ubuntu-latest
     outputs:
-      ubuntu-matrix: ${{ steps.build-ubuntu-matrix.outputs.matrix }}
-      macos-matrix: ${{ steps.build-macos-matrix.outputs.matrix }}
-      windows-matrix: ${{ steps.build-windows-matrix.outputs.matrix }}
+      ubuntu-matrix: ${{ steps.build-ubuntu-matrix.outputs.ubuntu-matrix }}
+      macos-matrix: ${{ steps.build-macos-matrix.outputs.macos-matrix }}
+      windows-matrix: ${{ steps.build-windows-matrix.outputs.windows-matrix }}
     steps:
       - id: build-ubuntu-matrix
+        name: Build Ubuntu matrix
         run: |
-          matrix='[]'
+          ubuntu_matrix='[]'
           if [ "${{ inputs.enable-ubuntu2404-gcc-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-24.04", "config": "Release", "compiler": "gcc"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-24.04", "config": "Release", "compiler": "gcc"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2404-gcc-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-24.04", "config": "Debug", "compiler": "gcc"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-24.04", "config": "Debug", "compiler": "gcc"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2404-clang-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-24.04", "config": "Release", "compiler": "clang"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-24.04", "config": "Release", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2404-clang-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-24.04", "config": "Debug", "compiler": "clang"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-24.04", "config": "Debug", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2204-gcc-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-22.04", "config": "Release", "compiler": "gcc"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-22.04", "config": "Release", "compiler": "gcc"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2204-gcc-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-22.04", "config": "Debug", "compiler": "gcc"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-22.04", "config": "Debug", "compiler": "gcc"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2204-clang-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-22.04", "config": "Release", "compiler": "clang"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-22.04", "config": "Release", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2204-clang-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-22.04", "config": "Debug", "compiler": "clang"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-22.04", "config": "Debug", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2404-arm-gcc-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-24.04-arm", "config": "Release", "compiler": "gcc"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-24.04-arm", "config": "Release", "compiler": "gcc"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2404-arm-gcc-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-24.04-arm", "config": "Debug", "compiler": "gcc"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-24.04-arm", "config": "Debug", "compiler": "gcc"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2404-arm-clang-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-24.04-arm", "config": "Release", "compiler": "clang"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-24.04-arm", "config": "Release", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2404-arm-clang-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-24.04-arm", "config": "Debug", "compiler": "clang"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-24.04-arm", "config": "Debug", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2204-arm-gcc-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-22.04-arm", "config": "Release", "compiler": "gcc"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-22.04-arm", "config": "Release", "compiler": "gcc"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2204-arm-gcc-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-22.04-arm", "config": "Debug", "compiler": "gcc"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-22.04-arm", "config": "Debug", "compiler": "gcc"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2204-arm-clang-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-22.04-arm", "config": "Release", "compiler": "clang"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-22.04-arm", "config": "Release", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-ubuntu2204-arm-clang-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "ubuntu-22.04-arm", "config": "Debug", "compiler": "clang"}]')
+            ubuntu_matrix=$(echo $ubuntu_matrix | jq '. += [{"runs-on": "ubuntu-22.04-arm", "config": "Debug", "compiler": "clang"}]')
           fi
-          echo "matrix=$(echo $matrix | jq -rc .)" >> $GITHUB_OUTPUT
+          echo "ubuntu-matrix=$(echo $ubuntu_matrix | jq -rc .)" >> $GITHUB_OUTPUT
+          echo $(echo $ubuntu_matrix | jq -rc .)
       - id: build-macos-matrix
+        name: Build macOS matrix
         run: |
-          matrix='[]'
+          macos_matrix='[]'
           if [ "${{ inputs.enable-macos13-clang-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "macos-13", "config": "Release", "compiler": "clang"}]')
+            macos_matrix=$(echo $macos_matrix | jq '. += [{"runs-on": "macos-13", "config": "Release", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-macos13-clang-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "macos-13", "config": "Debug", "compiler": "clang"}]')
+            macos_matrix=$(echo $macos_matrix | jq '. += [{"runs-on": "macos-13", "config": "Debug", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-macos13-gcc-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "macos-13", "config": "Release", "compiler": "gcc"}]')
+            macos_matrix=$(echo $macos_matrix | jq '. += [{"runs-on": "macos-13", "config": "Release", "compiler": "gcc"}]')
           fi
           if [ "${{ inputs.enable-macos13-gcc-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "macos-13", "config": "Debug", "compiler": "gcc"}]')
+            macos_matrix=$(echo $macos_matrix | jq '. += [{"runs-on": "macos-13", "config": "Debug", "compiler": "gcc"}]')
           fi
           if [ "${{ inputs.enable-macos14-clang-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "macos-14", "config": "Release", "compiler": "clang"}]')
+            macos_matrix=$(echo $macos_matrix | jq '. += [{"runs-on": "macos-14", "config": "Release", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-macos14-clang-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "macos-14", "config": "Debug", "compiler": "clang"}]')
+            macos_matrix=$(echo $macos_matrix | jq '. += [{"runs-on": "macos-14", "config": "Debug", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-macos14-gcc-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "macos-14", "config": "Release", "compiler": "gcc"}]')
+            macos_matrix=$(echo $macos_matrix | jq '. += [{"runs-on": "macos-14", "config": "Release", "compiler": "gcc"}]')
           fi
           if [ "${{ inputs.enable-macos14-gcc-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "macos-14", "config": "Debug", "compiler": "gcc"}]')
+            macos_matrix=$(echo $macos_matrix | jq '. += [{"runs-on": "macos-14", "config": "Debug", "compiler": "gcc"}]')
           fi
           if [ "${{ inputs.enable-macos15-clang-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "macos-15", "config": "Release", "compiler": "clang"}]')
+            macos_matrix=$(echo $macos_matrix | jq '. += [{"runs-on": "macos-15", "config": "Release", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-macos15-clang-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "macos-15", "config": "Debug", "compiler": "clang"}]')
+            macos_matrix=$(echo $macos_matrix | jq '. += [{"runs-on": "macos-15", "config": "Debug", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-macos15-gcc-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "macos-15", "config": "Release", "compiler": "gcc"}]')
+            macos_matrix=$(echo $macos_matrix | jq '. += [{"runs-on": "macos-15", "config": "Release", "compiler": "gcc"}]')
           fi
           if [ "${{ inputs.enable-macos15-gcc-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "macos-15", "config": "Debug", "compiler": "gcc"}]')
+            macos_matrix=$(echo $macos_matrix | jq '. += [{"runs-on": "macos-15", "config": "Debug", "compiler": "gcc"}]')
           fi
-          echo "matrix=$(echo $matrix | jq -rc .)" >> $GITHUB_OUTPUT
+          echo "macos-matrix=$(echo $macos_matrix | jq -rc .)" >> $GITHUB_OUTPUT
+          echo $(echo $macos_matrix | jq -rc .)
       - id: build-windows-matrix
+        name: Build Windows matrix
         run: |
-          matrix='[]'
+          windows_matrix='[]'
           if [ "${{ inputs.enable-windows2022-msvc-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "windows-2022", "config": "Release", "compiler": "msvc"}]')
+            windows_matrix=$(echo $windows_matrix | jq '. += [{"runs-on": "windows-2022", "config": "Release", "compiler": "msvc"}]')
           fi
           if [ "${{ inputs.enable-windows2022-msvc-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "windows-2022", "config": "Debug", "compiler": "msvc"}]')
+            windows_matrix=$(echo $windows_matrix | jq '. += [{"runs-on": "windows-2022", "config": "Debug", "compiler": "msvc"}]')
           fi
           if [ "${{ inputs.enable-windows2022-clang-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "windows-2022", "config": "Release", "compiler": "clang"}]')
+            windows_matrix=$(echo $windows_matrix | jq '. += [{"runs-on": "windows-2022", "config": "Release", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-windows2022-clang-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "windows-2022", "config": "Debug", "compiler": "clang"}]')
+            windows_matrix=$(echo $windows_matrix | jq '. += [{"runs-on": "windows-2022", "config": "Debug", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-windows2025-msvc-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "windows-2025", "config": "Release", "compiler": "msvc"}]')
+            windows_matrix=$(echo $windows_matrix | jq '. += [{"runs-on": "windows-2025", "config": "Release", "compiler": "msvc"}]')
           fi
           if [ "${{ inputs.enable-windows2025-msvc-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "windows-2025", "config": "Debug", "compiler": "msvc"}]')
+            windows_matrix=$(echo $windows_matrix | jq '. += [{"runs-on": "windows-2025", "config": "Debug", "compiler": "msvc"}]')
           fi
           if [ "${{ inputs.enable-windows2025-clang-release }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "windows-2025", "config": "Release", "compiler": "clang"}]')
+            windows_matrix=$(echo $windows_matrix | jq '. += [{"runs-on": "windows-2025", "config": "Release", "compiler": "clang"}]')
           fi
           if [ "${{ inputs.enable-windows2025-clang-debug }}" == "true" ]; then
-            matrix=$(echo $matrix | jq '. += [{"runs-on": "windows-2025", "config": "Debug", "compiler": "clang"}]')
+            windows_matrix=$(echo $windows_matrix | jq '. += [{"runs-on": "windows-2025", "config": "Debug", "compiler": "clang"}]')
           fi
-          echo "matrix=$(echo $matrix | jq -rc .)" >> $GITHUB_OUTPUT
+          echo "windows-matrix=$(echo $windows_matrix | jq -rc .)" >> $GITHUB_OUTPUT
+          echo $(echo $windows_matrix | jq -rc .)
 
   cpp-tests-ubuntu:
     name: 🐧 ${{ matrix.runs-on }} ${{ matrix.compiler }} ${{ matrix.config }}
