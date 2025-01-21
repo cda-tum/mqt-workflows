@@ -3,8 +3,11 @@ name: 🐍 • CI
 on:
   workflow_call:
     inputs:
+      ###---- General inputs ----------------------------------------------------------------------------------------###
       skip-testing-latest-python:
-        description: "Whether to skip testing on the latest Python version. This only has an effect if the Python tests are run individually."
+        description: >
+          Whether to skip testing on the latest Python version.
+          This only has an effect if the Python tests are run individually.
         default: false
         type: boolean
       run-tests-individually:
@@ -19,6 +22,59 @@ on:
         description: "The version of Z3 to set up"
         default: "4.13.0"
         type: string
+      ###---- Ubuntu-specific inputs --------------------------------------------------------------------------------###
+      ### Runs (ubuntu-24.04, ubuntu-22.04, ubuntu-24.04-arm, ubuntu-22.04-arm)
+      ### Defaults are
+      ### - ubuntu-24.04
+      ### - ubuntu-24.04-arm
+      ###------------------------------------------------------------------------------------------------------------###
+      enable-ubuntu2404:
+        description: "Whether to enable the Ubuntu 24.04 runner"
+        default: true
+        type: boolean
+      enable-ubuntu2204:
+        description: "Whether to enable the Ubuntu 22.04 runner"
+        default: false
+        type: boolean
+      enable-ubuntu2404-arm:
+        description: "Whether to enable the Ubuntu 24.04 ARM runner"
+        default: true
+        type: boolean
+      enable-ubuntu2204-arm:
+        description: "Whether to enable the Ubuntu 22.04 ARM runner"
+        default: false
+        type: boolean
+      ###---- macOS-specific inputs ---------------------------------------------------------------------------------###
+      ### Runs (macos-13, macos-14, macos-15)
+      ### Defaults are
+      ### - macos-13
+      ### - macos-14
+      ###------------------------------------------------------------------------------------------------------------###
+      enable-macos13:
+        description: "Whether to enable the macOS 13 runner"
+        default: true
+        type: boolean
+      enable-macos14:
+        description: "Whether to enable the macOS 14 runner"
+        default: true
+        type: boolean
+      enable-macos15:
+        description: "Whether to enable the macOS 15 runner"
+        default: false
+        type: boolean
+      ###---- Windows-specific inputs -------------------------------------------------------------------------------###
+      ### Runs (windows-2022, windows-2025)
+      ### Defaults are
+      ### - windows-2022
+      ###------------------------------------------------------------------------------------------------------------###
+      enable-windows2022:
+        description: "Whether to enable the Windows 2022 runner"
+        default: true
+        type: boolean
+      enable-windows2025:
+        description: "Whether to enable the Windows 2025 runner"
+        default: false
+        type: boolean
 
 jobs:
   lint:
@@ -56,24 +112,53 @@ jobs:
     outputs:
       python-versions: ${{ steps.supported-python-versions.outputs.supported-python-versions }}
 
+  build-matrices:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build-matrix.outputs.matrix }}
+    steps:
+      - id: build-matrix
+        name: Build runner matrix
+        run: |
+          matrix='[]'
+          if [ "${{ inputs.enable-ubuntu2404 }}" = "true" ]; then
+            matrix=$(echo $matrix | jq '. + [{"runs-on": "ubuntu-24.04"}]')
+          fi
+          if [ "${{ inputs.enable-ubuntu2204 }}" = "true" ]; then
+            matrix=$(echo $matrix | jq '. + [{"runs-on": "ubuntu-22.04"}]')
+          fi
+          if [ "${{ inputs.enable-ubuntu2404-arm }}" = "true" ]; then
+            matrix=$(echo $matrix | jq '. + [{"runs-on": "ubuntu-24.04-arm"}]')
+          fi
+          if [ "${{ inputs.enable-ubuntu2204-arm }}" = "true" ]; then
+            matrix=$(echo $matrix | jq '. + [{"runs-on": "ubuntu-22.04-arm"}]')
+          fi
+          if [ "${{ inputs.enable-macos13 }}" = "true" ]; then
+            matrix=$(echo $matrix | jq '. + [{"runs-on": "macos-13"}]')
+          fi
+          if [ "${{ inputs.enable-macos14 }}" = "true" ]; then
+            matrix=$(echo $matrix | jq '. + [{"runs-on": "macos-14"}]')
+          fi
+          if [ "${{ inputs.enable-macos15 }}" = "true" ]; then
+            matrix=$(echo $matrix | jq '. + [{"runs-on": "macos-15"}]')
+          fi
+          if [ "${{ inputs.enable-windows2022 }}" = "true" ]; then
+            matrix=$(echo $matrix | jq '. + [{"runs-on": "windows-2022"}]')
+          fi
+          if [ "${{ inputs.enable-windows2025 }}" = "true" ]; then
+            matrix=$(echo $matrix | jq '. + [{"runs-on": "windows-2025"}]')
+          fi
+          echo "matrix=$(echo $matrix | jq -rc .)" >> $GITHUB_OUTPUT
+          echo $(echo $matrix | jq -rc .)
+
   python-tests:
     if: ${{ !inputs.run-tests-individually }}
+    needs: [build-matrices]
     name: 🐍 ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        runs-on:
-          [
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            ubuntu-24.04,
-            ubuntu-24.04-arm,
-            macos-13,
-            macos-14,
-            macos-15,
-            windows-2022,
-            windows-2025,
-          ]
+        include: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
     uses: ./.github/workflows/reusable-python-tests.yml
     with:
       runs-on: ${{ matrix.runs-on }}
@@ -82,23 +167,12 @@ jobs:
 
   python-tests-individual:
     if: ${{ inputs.run-tests-individually }}
-    needs: [dist]
-    name: 🐍 ${{ matrix.session }} ${{ matrix.python-version }} ${{ matrix.runs-on }}
+    needs: [build-matrices, dist]
+    name: 🐍 ${{ matrix.python-version }} ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        runs-on:
-          [
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            ubuntu-24.04,
-            ubuntu-24.04-arm,
-            macos-13,
-            macos-14,
-            macos-15,
-            windows-2022,
-            windows-2025,
-          ]
+        include: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
         python-version: ${{ fromJson(needs.dist.outputs.python-versions) }}
     uses: ./.github/workflows/reusable-python-tests-individual.yml
     with:
