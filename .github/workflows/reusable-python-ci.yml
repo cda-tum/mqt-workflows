@@ -4,16 +4,6 @@ on:
   workflow_call:
     inputs:
       ###---- General inputs ----------------------------------------------------------------------------------------###
-      skip-testing-latest-python:
-        description: >
-          Whether to skip testing on the latest Python version.
-          This only has an effect if the Python tests are run individually.
-        default: false
-        type: boolean
-      run-tests-individually:
-        description: "Whether to run the Python tests individually or combined"
-        default: false
-        type: boolean
       setup-z3:
         description: "Whether to set up Z3"
         default: false
@@ -77,41 +67,6 @@ on:
         type: boolean
 
 jobs:
-  lint:
-    name: 🚨 Lint
-    uses: ./.github/workflows/reusable-python-linter.yml
-    with:
-      setup-z3: ${{ inputs.setup-z3 }}
-      z3-version: ${{ inputs.z3-version }}
-
-  dist:
-    name: 📦 Check
-    runs-on: ubuntu-latest
-    steps:
-      # check out the repository (including submodules and all history)
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      # optionally set up Z3
-      - if: ${{ inputs.setup-z3 }}
-        name: Setup Z3
-        uses: cda-tum/setup-z3@v1
-        with:
-          version: ${{ inputs.z3-version }}
-      # set up mold as linker for faster C++ builds
-      - name: Set up mold as linker
-        uses: rui314/setup-mold@v1
-      # run the build-and-inspect-python-package action (outputs supported Python versions)
-      - uses: hynek/build-and-inspect-python-package@v2
-        id: baipp
-      # reduce the list of Python versions by one if the latest Python version is to be skipped
-      - name: 🐍 Conditionally reduce the list of considered Python versions
-        run: echo "supported-python-versions=$(echo '${{ steps.baipp.outputs.supported_python_classifiers_json_array }}' | jq -rc 'if ${{ inputs.skip-testing-latest-python }} then .[:-1] else . end')" >> $GITHUB_OUTPUT
-        id: supported-python-versions
-    outputs:
-      python-versions: ${{ steps.supported-python-versions.outputs.supported-python-versions }}
-
   build-matrices:
     runs-on: ubuntu-latest
     outputs:
@@ -152,7 +107,6 @@ jobs:
           echo $(echo $matrix | jq -rc .)
 
   python-tests:
-    if: ${{ !inputs.run-tests-individually }}
     needs: [build-matrices]
     name: 🐍 ${{ matrix.runs-on }}
     strategy:
@@ -165,50 +119,9 @@ jobs:
       setup-z3: ${{ inputs.setup-z3 }}
       z3-version: ${{ inputs.z3-version }}
 
-  python-tests-individual:
-    if: ${{ inputs.run-tests-individually }}
-    needs: [build-matrices, dist]
-    name: 🐍 ${{ matrix.python-version }} ${{ matrix.runs-on }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
-        python-version: ${{ fromJson(needs.dist.outputs.python-versions) }}
-    uses: ./.github/workflows/reusable-python-tests-individual.yml
-    with:
-      runs-on: ${{ matrix.runs-on }}
-      python-version: ${{ matrix.python-version }}
-      setup-z3: ${{ inputs.setup-z3 }}
-      z3-version: ${{ inputs.z3-version }}
-
   python-coverage-upload:
-    if: ${{ !inputs.run-tests-individually }}
     name: 📈
     needs: [python-tests]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read # Required for the `actions/checkout` action
-      id-token: write # Required for the `codecov/codecov-action` action
-    steps:
-      # check out the repository (mostly for the codecov config)
-      - uses: actions/checkout@v4
-      # download coverage reports from all jobs
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: coverage-*
-          path: coverage-reports
-          merge-multiple: true
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          fail_ci_if_error: true
-          flags: python
-          use_oidc: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
-
-  python-coverage-upload-individual:
-    if: ${{ inputs.run-tests-individually }}
-    name: 📈
-    needs: [python-tests-individual]
     runs-on: ubuntu-latest
     permissions:
       contents: read # Required for the `actions/checkout` action
