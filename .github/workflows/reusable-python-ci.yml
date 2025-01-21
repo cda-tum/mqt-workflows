@@ -100,12 +100,10 @@ jobs:
             windows-2025,
           ]
         python-version: ${{ fromJson(needs.dist.outputs.python-versions) }}
-        session: ["minimums", "tests"]
     uses: ./.github/workflows/reusable-python-tests-individual.yml
     with:
       runs-on: ${{ matrix.runs-on }}
       python-version: ${{ matrix.python-version }}
-      session: ${{ matrix.session }}
       setup-z3: ${{ inputs.setup-z3 }}
       z3-version: ${{ inputs.z3-version }}
 
