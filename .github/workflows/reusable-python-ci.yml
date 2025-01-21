@@ -67,7 +67,7 @@ on:
         type: boolean
 
 jobs:
-  build-matrices:
+  build-matrix:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.build-matrix.outputs.matrix }}
@@ -107,7 +107,7 @@ jobs:
           echo $(echo $matrix | jq -rc .)
 
   python-tests:
-    needs: [build-matrices]
+    needs: [build-matrix]
     name: 🐍 ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
