@@ -19,10 +19,6 @@ on:
         description: "Whether to build wheels for platforms that require emulation"
         default: true
         type: boolean
-      no-local-version:
-        description: "Whether to configure setuptools_scm to not use local version identifiers"
-        default: false
-        type: boolean
 
 jobs:
   build_sdist:
@@ -37,34 +33,16 @@ jobs:
       # set up uv for faster Python package management
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v5
-      # workaround for https://github.com/pypa/setuptools-scm/issues/455
-      - if: ${{ inputs.no-local-version }}
-        name: Disable local version identifiers for setuptools_scm
-        run: |
-          uv run --no-project --with tomlkit - <<'EOF'
-          from pathlib import Path
-          import tomlkit
-
-          pyproject_toml_path = Path.cwd() / "pyproject.toml"
-          pyproject_toml_txt = pyproject_toml_path.read_text()
-          pyproject_toml = tomlkit.loads(pyproject_toml_txt)
-          setuptools_scm_section = pyproject_toml["tool"]["setuptools_scm"]
-          setuptools_scm_section["local_scheme"] = "no-local-version"
-          patched_pyproject_toml_txt = tomlkit.dumps(pyproject_toml)
-          pyproject_toml_path.write_text(patched_pyproject_toml_txt)
-          EOF
-          git diff --color=always
-          git update-index --assume-unchanged pyproject.toml
       # build the source distribution
       - name: Build SDist
         run: uv build --sdist
       # check the metadata of the source distribution
       - name: Check metadata
         run: uvx twine check dist/*
-      # upload the source distribution as an artifact (adds `dev-` and `test-` prefixes for PRs and continuous deployment, respectively)
+      # upload the source distribution as an artifact (adds a `dev-` prefix for PRs)
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event_name == 'pull_request' && 'dev-' || inputs.no-local-version && 'test-' || '' }}cibw-sdist
+          name: ${{ github.event_name == 'pull_request' && 'dev-' || '' }}cibw-sdist
           path: dist/*.tar.gz
 
   build_wheel:
@@ -80,34 +58,16 @@ jobs:
       # set up uv for faster Python package management
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v5
-      # workaround for https://github.com/pypa/setuptools-scm/issues/455
-      - if: ${{ inputs.no-local-version }}
-        name: Disable local version identifiers for setuptools_scm
-        run: |
-          uv run --no-project --with tomlkit - <<'EOF'
-          from pathlib import Path
-          import tomlkit
-
-          pyproject_toml_path = Path.cwd() / "pyproject.toml"
-          pyproject_toml_txt = pyproject_toml_path.read_text()
-          pyproject_toml = tomlkit.loads(pyproject_toml_txt)
-          setuptools_scm_section = pyproject_toml["tool"]["setuptools_scm"]
-          setuptools_scm_section["local_scheme"] = "no-local-version"
-          patched_pyproject_toml_txt = tomlkit.dumps(pyproject_toml)
-          pyproject_toml_path.write_text(patched_pyproject_toml_txt)
-          EOF
-          git diff --color=always
-          git update-index --assume-unchanged pyproject.toml
       # build the wheel
       - name: Build Wheel
         run: uv build --wheel
       # check the metadata of the wheel
       - name: Check metadata
         run: uvx twine check dist/*
-      # upload the wheel as an artifact (adds `dev-` and `test-` prefixes for PRs and continuous deployment, respectively)
+      # upload the wheel as an artifact (adds a `dev-` prefix for PRs)
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event_name == 'pull_request' && 'dev-' || inputs.no-local-version && 'test-' || '' }}cibw-wheel
+          name: ${{ github.event_name == 'pull_request' && 'dev-' || '' }}cibw-wheel
           path: dist/*.whl
 
   build_wheels:
@@ -152,35 +112,16 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: ${{ matrix.runs-on != 'ubuntu-24.04' && matrix.runs-on != 'ubuntu-24.04-arm' }}
-      # workaround for https://github.com/pypa/setuptools-scm/issues/455
-      - if: ${{ inputs.no-local-version }}
-        name: Disable local version identifiers for setuptools_scm
-        shell: bash
-        run: |
-          uv run --no-project --with tomlkit - <<'EOF'
-          from pathlib import Path
-          import tomlkit
-
-          pyproject_toml_path = Path.cwd() / "pyproject.toml"
-          pyproject_toml_txt = pyproject_toml_path.read_text()
-          pyproject_toml = tomlkit.loads(pyproject_toml_txt)
-          setuptools_scm_section = pyproject_toml["tool"]["setuptools_scm"]
-          setuptools_scm_section["local_scheme"] = "no-local-version"
-          patched_pyproject_toml_txt = tomlkit.dumps(pyproject_toml)
-          pyproject_toml_path.write_text(patched_pyproject_toml_txt)
-          EOF
-          git diff --color=always
-          git update-index --assume-unchanged pyproject.toml
       # run cibuildwheel to build wheels for the specified Python version
       - uses: pypa/cibuildwheel@v2.22
       - name: Verify clean directory
         run: git diff --exit-code
         shell: bash
-      # upload the wheels as an artifact (adds `dev-` and `test-` prefixes for PRs and continuous deployment, respectively)
+      # upload the wheels as an artifact (adds a `dev-` prefix for PRs)
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event_name == 'pull_request' && 'dev-' || inputs.no-local-version && 'test-' || '' }}cibw-wheels-${{ matrix.runs-on }}-${{ strategy.job-index }}
+          name: ${{ github.event_name == 'pull_request' && 'dev-' || '' }}cibw-wheels-${{ matrix.runs-on }}-${{ strategy.job-index }}
           path: wheelhouse/*.whl
 
   build_wheels_emulation:
@@ -211,32 +152,14 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: false
-      # workaround for https://github.com/pypa/setuptools-scm/issues/455
-      - if: ${{ inputs.no-local-version }}
-        name: Disable local version identifiers for setuptools_scm
-        run: |
-          uv run --no-project --with tomlkit - <<'EOF'
-          from pathlib import Path
-          import tomlkit
-
-          pyproject_toml_path = Path.cwd() / "pyproject.toml"
-          pyproject_toml_txt = pyproject_toml_path.read_text()
-          pyproject_toml = tomlkit.loads(pyproject_toml_txt)
-          setuptools_scm_section = pyproject_toml["tool"]["setuptools_scm"]
-          setuptools_scm_section["local_scheme"] = "no-local-version"
-          patched_pyproject_toml_txt = tomlkit.dumps(pyproject_toml)
-          pyproject_toml_path.write_text(patched_pyproject_toml_txt)
-          EOF
-          git diff --color=always
-          git update-index --assume-unchanged pyproject.toml
       # run cibuildwheel to build wheels for the specified Python version
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22
         env:
           CIBW_ARCHS_LINUX: ${{ matrix.arch }}
           CIBW_TEST_SKIP: "cp*"
-      # upload the wheels as an artifact (adds `dev-` and `test-` prefixes for PRs and continuous deployment, respectively)
+      # upload the wheels as an artifact (adds a `dev-` prefix for PRs)
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event_name == 'pull_request' && 'dev-' || inputs.no-local-version && 'test-' || '' }}cibw-wheels-${{ matrix.arch }}-${{ strategy.job-index }}
+          name: ${{ github.event_name == 'pull_request' && 'dev-' || '' }}cibw-wheels-${{ matrix.arch }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
