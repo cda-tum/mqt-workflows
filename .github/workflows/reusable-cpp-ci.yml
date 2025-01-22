@@ -15,7 +15,7 @@ on:
         type: boolean
       z3-version:
         description: "The version of Z3 to set up"
-        default: "4.13.0"
+        default: "4.13.4"
         type: string
       ###---- Ubuntu-specific inputs --------------------------------------------------------------------------------###
       ### Runs (ubuntu-24.04, ubuntu-22.04, ubuntu-24.04-arm, ubuntu-22.04-arm) x (gcc, clang) x (Release, Debug)
