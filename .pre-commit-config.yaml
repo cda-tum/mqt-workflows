@@ -53,14 +53,14 @@ repos:
 
   # Format configuration files with prettier
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: "v3.5.1"
+    rev: "v3.5.2"
     hooks:
       - id: prettier
         types_or: [yaml, markdown, html, css, scss, javascript, json]
 
   # Check JSON schemata
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: "0.31.1"
+    rev: "0.31.2"
     hooks:
       - id: check-dependabot
       - id: check-github-workflows
