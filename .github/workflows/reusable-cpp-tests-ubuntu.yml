@@ -73,7 +73,7 @@ jobs:
       - name: Configure CMake
         run: |
           cmake_args="${{ inputs.cmake-args }}"
-          if [ "${{ inputs.compiler }}" == "gcc" ]; then
+          if [ "${{ inputs.compiler }}" == "clang" ]; then
             cmake_args="$cmake_args -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
           fi
           cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=${{ inputs.config }} $cmake_args
