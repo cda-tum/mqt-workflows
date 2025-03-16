@@ -55,6 +55,14 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
+      # Explicitly set CC and CXX for Ubuntu ARM runners to work around an issue
+      # where CXX would wrongfully be set to an x86_64 compiler.
+      - name: Set CC and CXX for ARM
+        if: ${{ runner.os }} == 'Linux' && ${{ runner.arch }} == 'ARM64'
+        run: |
+          echo "CC=gcc" >> $GITHUB_ENV
+          echo "CXX=g++" >> $GITHUB_ENV
+
       # Run the nox qiskit session
       - name: Test against latest Qiskit
         run: uvx nox -s qiskit --verbose

@@ -49,6 +49,13 @@ jobs:
       # set up uv for faster Python package management
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v5
+      # explicitly set CC and CXX for Ubuntu ARM runners to work around an issue
+      # where CXX would wrongfully be set to an x86_64 compiler.
+      - name: Set CC and CXX for ARM
+        if: ${{ runner.os }} == 'Linux' && ${{ runner.arch }} == 'ARM64'
+        run: |
+          echo "CC=gcc" >> $GITHUB_ENV
+          echo "CXX=g++" >> $GITHUB_ENV
       # run the nox minimums session (assumes a nox session named "minimums" exists) with coverage
       - name: 🐍 Test with minimal versions
         run: uvx nox -s minimums --verbose -- --cov --cov-report=xml:coverage-${{ inputs.runs-on }}.xml --cov-append
