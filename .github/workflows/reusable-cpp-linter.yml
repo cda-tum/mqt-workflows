@@ -44,20 +44,27 @@ jobs:
         uses: cda-tum/setup-z3@v1
         with:
           version: ${{ inputs.z3-version }}
-      # install a specific version of clang
-      - name: Install clang-${{ env.clang-version }}
+      # install a specific version of the LLVM toolchain
+      - name: Install llvm@${{ env.clang-version }}
         run: |
           sudo apt-get update
           wget https://apt.llvm.org/llvm.sh -O ${{ runner.temp }}/llvm_install.sh
           chmod +x ${{ runner.temp }}/llvm_install.sh
           if sudo ${{ runner.temp }}/llvm_install.sh ${{ env.clang-version }}; then
-            sudo apt-get install -y clang-format-${{ env.clang-version }} clang-tidy-${{ env.clang-version }} || exit 1
+            sudo apt-get install -y clang-format-${{ env.clang-version }} \
+                                    clang-tidy-${{ env.clang-version }} \
+                                    libmlir-${{ env.clang-version }}-dev \
+                                    mlir-${{ env.clang-version }}-tools \
+                                    clang-${{ env.clang-version}} \
+                || exit 1
           else
             echo "Installation from script failed."
             exit 1
           fi
           echo "CC=clang-${{ env.clang-version }}" >> $GITHUB_ENV
           echo "CXX=clang++-${{ env.clang-version }}" >> $GITHUB_ENV
+          echo "MLIR_DIR=/usr/lib/llvm-${{ env.clang-version }}/lib/cmake/mlir" >> $GITHUB_ENV
+          echo "LLVM_DIR=/usr/lib/llvm-${{ env.clang-version }}/lib/cmake/llvm" >> $GITHUB_ENV
       # generate a compilation database (assumes that the CMake project has `CMAKE_EXPORT_COMPILE_COMMANDS` set)
       - name: Generate compilation database
         run: |
@@ -65,6 +72,8 @@ jobs:
           echo $CXX
           $CC --version
           $CXX --version
+          echo $MLIR_DIR
+          echo $LLVM_DIR
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug ${{ inputs.cmake-args }}
       # runs the cpp-linter action using the generated compilation database and the specified clang version
       - name: Run cpp-linter
