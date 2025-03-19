@@ -85,7 +85,7 @@ jobs:
           style: ""
           tidy-checks: ""
           version: ${{ env.clang-version }}
-          ignore: "build|**/python"
+          ignore: "build|**/python|!build/mlir"
           thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
           step-summary: true
           database: "build"
