@@ -79,6 +79,7 @@ jobs:
             !src/python/**
             test/**
             !test/python/**
+            mlir/**
             .clang-tidy
             .github/workflows/reusable-cpp-linter.yml
             .github/workflows/ci.yml
