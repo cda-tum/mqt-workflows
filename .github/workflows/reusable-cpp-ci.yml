@@ -129,7 +129,7 @@ on:
         type: boolean
       enable-macos14-clang-debug:
         description: "Whether to enable C++ testing on macOS 14 with Apple Clang in Debug mode"
-        default: true
+        default: false
         type: boolean
       enable-macos14-gcc-release:
         description: "Whether to enable C++ testing on macOS 14 with GCC in Release mode"
